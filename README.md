@@ -13,3 +13,6 @@ https://www.angelfire.com/clone/magicfriend/
 
 Angelica SX Disassembler (archive.org capture as long down)
 https://web.archive.org/web/20110816110647/http://online.dip.jp/angelica/index_e.html
+
+SX ASM Instructions
+www.sxlist.com/techref/scenix/inst.htm
