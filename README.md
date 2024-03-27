@@ -1,7 +1,7 @@
 # PS2-Magic-ICE-FINAL-REVERSE
 This is a project to reverse and resource the PS2 Magic ICE Final code.
 
-Still WIP stage
+Still WIP stage first focusing on SX28 before linking to compile from resource for SX48.
 
 This is a first coding project for me so please bare with the learning process ontop of the reversing side.
 
