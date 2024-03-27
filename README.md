@@ -16,3 +16,6 @@ https://web.archive.org/web/20110816110647/http://online.dip.jp/angelica/index_e
 
 SX ASM Instructions
 www.sxlist.com/techref/scenix/inst.htm
+
+Official SX Documents
+https://www.parallax.com/package/sx-key-usb-downloads/
