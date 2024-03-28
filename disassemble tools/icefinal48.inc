@@ -1,7 +1,7 @@
 ;------------------------------------------
 ;	MAGICE ICE FINAL SX48 ANGELICA labels address value off
 ;------------------------------------------
-; _ area obmitted in angelica output, left in for easier renaming of output. 
+; _ are obmitted in angelica output, left in for easier renaming of output. 
 VAR_DC1             	    =           $0A ; DS 1 ; delay counter 1(small)
 VAR_DC2             	    =           $0B ; DS 1 ; delay counter 2(small)
 VAR_DC3             	    =           $0C ; DS 1 ; delay counter 3(big)
@@ -23,7 +23,7 @@ ra	=	$05
 ;IO_BIOS_OE = ra.0 ; (BIOS:OE#)RA0(R)
 ;IO_BIOS_CS = rb.1 ; LOW = BIOS select ; (BIOS0 CS)RB4(W)
 ;IO_REST = rb.2 ; LOW = rest down ; (PSX2REST)RA3(REST) via 33k
-IO_BIOS_DATA = $07 ; rc IO_BIOS_DATA acts as only one bus always with ICE FINAL.;rc IO_BIOS_DATA acts as only one bus always with ICE FINAL.
+IO_BIOS_DATA = $07 ; rc IO_BIOS_DATA acts as only one bus always with ICE FINAL.
 ;IO_BIOS_DATA-v = rc.0
 ;IO_BIOS_DATA-u = rc.1
 ;IO_BIOS_DATA-t = rc.2
@@ -33,7 +33,7 @@ IO_BIOS_DATA = $07 ; rc IO_BIOS_DATA acts as only one bus always with ICE FINAL.
 ;IO_BIOS_DATA-n = rc.6
 ;IO_BIOS_DATA-m = rc.7
 ;IO_EJECT = rb.3 ; LOW = CD IN, HI = CD OUT ; (PS2:EJECT)RB3(Z)
-rb = $06 ; only I B 1Q 1R ref individually in ICE
+rb = $06 ; only I B 1Q 1R ref individually in ICE FINAL.
 ;IO_CDDVD_BUS_f = rb.0
 ;IO_CDDVD_BUS_b = rb.4
 ;IO_CDDVD_BUS_g = rb.5
