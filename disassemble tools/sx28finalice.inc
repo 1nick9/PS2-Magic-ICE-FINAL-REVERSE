@@ -34,7 +34,7 @@ IO_BIOS_DATA = $07 ; rc IO_BIOS_DATA acts as only one bus always with ICE FINAL.
 ;IO_BIOS_DATA-n = rc.6
 ;IO_BIOS_DATA-m = rc.7
 ;IO_EJECT = rb.3 ; LOW = CD IN, HI = CD OUT ; (PS2:EJECT)RB3(Z)
-rb = $06 ; rb only I B 1Q 1R ref individually in ICE FINAL.
+rb = $06 ; IO_CDDVD_BUS only I B ref individually in ICE FINAL
 ;IO_CDDVD_BUS_f = rb.0
 ;IO_CDDVD_BUS_b = rb.4
 ;IO_CDDVD_BUS_g = rb.5
