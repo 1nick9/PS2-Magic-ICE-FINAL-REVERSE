@@ -42,6 +42,7 @@ VAR_PATCH_FLAGS			equ		$0E ; DS 1 ; appears to be bits set for running patch rou
 ;ps1 related = VAR_PATCH_FLAGS.0	; related to ps1 and dev1, process mode reboot flag??
 
 ;?????? = VAR_PATCH_FLAGS.1			; related to dev1
+
 ;MODE_START_END_REF = VAR_PATCH_FLAGS.2		
 ;seems to be ref for mode started and mode end, cleared when finished mode run or on reset if mode was incomplete finish not checking
 ;clrb on PS1_BOOT_MODE to set for flow PS1_MODE ?
@@ -1666,24 +1667,24 @@ CDDVD_PATCH_DATA										; different get sync for where patch is spc/dragon ?
                     retw          $28					; 0010 1000 ; 3
                     retw          $20					; 0010 0000 ; 4
                     retw          $ff					; 1111 1111 ; 5
-                    retw          $4					; 0000 0100 ; 7 ; USA end
-                    retw          $41					; 0100 0001 ; 8 ; PAL start
-                    retw          $44					; 0100 0100 ; 9
-                    retw          $fd					; 1111 1101 ; 10
-                    retw          $13					; 0001 0011 ; 11
-                    retw          $2b					; 0010 1011 ; 12
-                    retw          $61					; 0110 0001 ; 13
-                    retw          $22					; 0010 0010 ; 14
-                    retw          $13					; 0001 0011 ; 15 ; PAL end
-                    retw          $31					; 0011 0001 ; 16 ; JAP start
-                    retw          $8c					; 1000 1100 ; 17
-                    retw          $b0					; 1011 0000 ; 18
-                    retw          $3					; 0000 0011 ; 19
-                    retw          $3a					; 0011 1010 ; 20
-                    retw          $31					; 0011 0001 ; 21
-                    retw          $33					; 0011 0011 ; 22
-                    retw          $19					; 0001 1001 ; 23
-                    retw          $91					; 1001 0001 ; 24 ; JAP end
+                    retw          $4					; 0000 0100 ; 6 ; USA end
+                    retw          $41					; 0100 0001 ; 7 ; PAL start
+                    retw          $44					; 0100 0100 ; 8
+                    retw          $fd					; 1111 1101 ; 9
+                    retw          $13					; 0001 0011 ; 10
+                    retw          $2b					; 0010 1011 ; 11
+                    retw          $61					; 0110 0001 ; 12
+                    retw          $22					; 0010 0010 ; 13
+                    retw          $13					; 0001 0011 ; 14 ; PAL end
+                    retw          $31					; 0011 0001 ; 15 ; JAP start
+                    retw          $8c					; 1000 1100 ; 16
+                    retw          $b0					; 1011 0000 ; 17
+                    retw          $3					; 0000 0011 ; 18
+                    retw          $3a					; 0011 1010 ; 19
+                    retw          $31					; 0011 0001 ; 20
+                    retw          $33					; 0011 0011 ; 21
+                    retw          $19					; 0001 1001 ; 22
+                    retw          $91					; 1001 0001 ; 23 ; JAP end
 					
 START_CDDVD_PATCH          clr           fsr
                     setb          IO_CDDVD_OE_A_1R
