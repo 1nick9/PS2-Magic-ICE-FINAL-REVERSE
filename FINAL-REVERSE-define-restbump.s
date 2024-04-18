@@ -27,7 +27,7 @@ VAR_DC2				equ		$09 ; DS 1 ; delay counter 2(small)
 VAR_DC3				equ		$0A ; DS 1 ; delay counter 3(big)
 VAR_TOFFSET			equ		$0b ; DS 1 ; table offset
 VAR_PSX_TEMP			equ		$0C ; DS 1 ; SEND_SCEX:  rename later
-VAR_PSX_BC			equ		$14 ; DS 1 ; SEND_SCEX:  byte counter  note start at 4(works down to 0)
+VAR_PSX_BC_CDDVD_TEMP			equ		$14 ; DS 1 ; SEND_SCEX:  byte counter  note start at 4(works down to 0) ; also used with mechacon patches and ps1 detect
 VAR_PSX_BYTE			equ		$0D ; DS 1 ; SEND_SCEX:  byte(to send)
 VAR_PSX_BITC			equ		$13 ; DS 1 ; SEND_SCEX:  bit counter ;note start at 8(works down to 0)
 VAR_BIOS_REV			equ		$10 ; DS 1 ; 1.X0 THE BIOS REVISION byte infront in BIOS string is X.00
@@ -67,9 +67,8 @@ VAR_PATCH_FLAGS			equ		$0E ; DS 1 ; appears to be bits set for running patch rou
 
 ;VAR_SWITCH.2 = not used
 
-;VAR_SWITCH.3 = FLAG FOR POST_PATCH_4_MODE_START2 to follow to clrb end. 
-;linked in with VAR_SWITCH.1 reboot logic state kept ?
-;PS2_MODE ? set when TAP_BOOT_MODE only clrb when end
+;VAR_SWITCH.3 = PS2_MODE ref set when TAP_BOOT_MODE only clrb when end
+;can flow onto ps1 reboot into PS1_MODE if detect ps1 media
 
 ;VAR_SWITCH.4 = DEV1 FLAG set
 ;-------------------------------------------------------------
@@ -252,7 +251,7 @@ jap          mov           w,#$4
 send_byte          mov           w,#$b
                     mov           !ra,w					; output:SCEX, input:all others
                     mov           w,#$4
-                    mov           VAR_PSX_BC,w			; 4 bytes to send
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w			; 4 bytes to send
 next_byte          mov           w,VAR_TOFFSET
                     call          SCEx_DATA
                     mov           VAR_PSX_BYTE,w
@@ -272,7 +271,7 @@ hi          call          SCEX_HI
 next2          decsz         VAR_PSX_BITC
                     jmp           send
                     inc           VAR_TOFFSET
-                    decsz         VAR_PSX_BC
+                    decsz         VAR_PSX_BC_CDDVD_TEMP
                     jmp           next_byte
                     clrb          IO_SCEX			; SCEX LOW
                     mov           w,#$16
@@ -512,17 +511,17 @@ MODE_SELECT_TIMER_L3          call          MODE_SELECT_TIMER
                     mov           w,#$64						; 100dec 
                     mov           VAR_DC2,w						; 
 DISABLE_MODE          call          MODE_SELECT_TIMER
-                    sb            IO_REST						; skip jmp DEV1_MODE_START IO_REST = 1 HIGH not pressed
+                    sb            IO_REST						; skip jmp DEV1_MODE_LOAD_START IO_REST = 1 HIGH not pressed
                     page          $0600							; PAGE8
-                    jmp           DEV1_MODE_START						; skip jmp DEV1_MODE_START if reset is not pressed 4sec + reset tap in 10sec
+                    jmp           DEV1_MODE_LOAD_START						; skip jmp DEV1_MODE_LOAD_START if reset is not pressed 4sec + reset tap in 10sec
                     decsz         VAR_DC2						; 10 sec timer to loop for dev1 mode same 4sec hold but release and press reset again withing 10secs.
                     jmp           DISABLE_MODE					; loop for 10secs		
                     sleep         								; no following press is modchip is disabled = sleep. kept till next standby ?
 PS1_BOOT_MODE          clr           fsr						; fsr ?
                     clrb          VAR_PATCH_FLAGS.2				; VAR_PATCH_FLAGS.2 clrb here related to cross ref on new mode run if last incomplete ?
-TAP_BOOT_MODE          snb           VAR_SWITCH.4				; jmp DEV1_MODE_START if VAR_SWITCH.4 = 1 . reset from boot mode kept from first standby mode set
+TAP_BOOT_MODE          snb           VAR_SWITCH.4				; jmp DEV1_MODE_LOAD_START if VAR_SWITCH.4 = 1 . reset from boot mode kept from first standby mode set
                     page          $0600							; PAGE8
-                    jmp           DEV1_MODE_START
+                    jmp           DEV1_MODE_LOAD_START
                     setb          VAR_PATCH_FLAGS.1
                     clrb          VAR_PATCH_FLAGS.0
                     setb          VAR_SWITCH.3
@@ -532,9 +531,9 @@ TAP_BOOT_MODE          snb           VAR_SWITCH.4				; jmp DEV1_MODE_START if VA
 					
 					
 CHECK_IF_START_PS2LOGO          clr           fsr
-                    sb            VAR_PATCH_FLAGS.2				; jmp START_PS2LOGO_PATCH if VAR_PATCH_FLAGS.2 not set meaning last process finished
+                    sb            VAR_PATCH_FLAGS.2				; jmp START_PS2LOGO_PATCH_LOAD if VAR_PATCH_FLAGS.2 not set meaning last process finished
                     page          $0400							; PAGE4
-                    jmp           START_PS2LOGO_PATCH
+                    jmp           START_PS2LOGO_PATCH_LOAD
                     sb            VAR_PATCH_FLAGS.2
                     jmp           TRAY_IS_EJECTED
 TRAY_IS_EJECTED          sb            IO_REST					; skip jmp PS1_BOOT_MODE if IO_REST = 1 HIGH
@@ -617,23 +616,23 @@ BIOS_WAIT_OE_LO_P2          snb           IO_BIOS_OE				; next byte / wait for b
                     ret           
 
 ;--------------------------------------------------------------------------------
-RESET_IO_BIOS_DATA_INPUT
+RUN_BIOS_PATCHES_SDRAM
 ;--------------------------------------------------------------------------------
-NOTCALLED1          mov           w,indf
+NOTCALLED1          mov           w,indf						; sdram address moved to w and output to  IO_BIOS_DATA
                     mov           IO_BIOS_DATA,w
-                    inc           fsr
-                    mov           w,#$10
-                    or            fsr,w
-RESET_IO_BIOS_DATA_INPUT_LOOP1          snb           IO_BIOS_OE				; next byte / wait for bios OE low
-                    jmp           RESET_IO_BIOS_DATA_INPUT_LOOP1				; jmp RESET_IO_BIOS_DATA_INPUT_LOOP1 if IO_BIOS_OE high
-                    decsz         VAR_DC2
-                    jmp           RESET_IO_BIOS_DATA_INPUT
-RESET_IO_BIOS_DATA_INPUT_LOOP2          sb            IO_BIOS_OE				; next byte / wait for bios OE high
-                    jmp           RESET_IO_BIOS_DATA_INPUT_LOOP2				; jmp RESET_IO_BIOS_DATA_INPUT_LOOP2 if IO_BIOS_OE high
-                    mov           w,#$ff					; 1111 1111
-                    mov           !IO_BIOS_DATA,w			; all pins Hi-Z input
+                    inc           fsr							; +1 to step through the sdram cached patches
+                    mov           w,#$10						; 10h or so always in sdram address section 6.2.1
+                    or            fsr,w							; so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+RUN_BIOS_PATCHES_SDRAM_SENDLOOP          snb           IO_BIOS_OE			; next byte / wait for bios OE low
+                    jmp           RUN_BIOS_PATCHES_SDRAM_SENDLOOP			; jmp RUN_BIOS_PATCHES_SDRAM_SENDLOOP if IO_BIOS_OE high
+                    decsz         VAR_DC2						; loop calling of sdram cache till VAR_DC2=0 then patch finished, VAR_DC2 set in loading of call here for ea patch
+                    jmp           RUN_BIOS_PATCHES_SDRAM
+END_BIOS_PATCHES_SDRAM_RESET_IO          sb            IO_BIOS_OE			; next byte / wait for bios OE high
+                    jmp           END_BIOS_PATCHES_SDRAM_RESET_IO			; jmp END_BIOS_PATCHES_SDRAM_RESET_IO if IO_BIOS_OE high
+                    mov           w,#$ff						; 1111 1111
+                    mov           !IO_BIOS_DATA,w					; all pins Hi-Z input
                     clr           fsr
-                    retp          
+                    retp          							; patching done. Return from call
 
 ;--------------------------------------------------------------------------------
 BIOS_PATCH_DATA
@@ -814,20 +813,20 @@ V12_CONSOLE_20_BIOS          setb          VAR_PATCH_FLAGS.3
                     mov           w,#$a9
                     mov           VAR_TOFFSET,w
                     mov           w,#$27								; 27h = 39
-ALL_CONTIUNE_BIOS_PATCH          snb           VAR_SWITCH.4				; jmp SECONDBIOS_PATCH_DEV1_STACK if VAR_SWITCH.4 set
+ALL_CONTIUNE_BIOS_PATCH          snb           VAR_SWITCH.4						; jmp SECONDBIOS_PATCH_DEV1_STACK if VAR_SWITCH.4 set
                     jmp           SECONDBIOS_PATCH_DEV1_STACK
                     mov           VAR_DC3,w								; VAR_DC3 27h = 39 start line ?
                     mov           w,#$15
-                    mov           fsr,w									; fsr ?
-RUN_BIOS_PATCH_DATA          mov           w,VAR_DC3					; VAR_DC3 moved w. VAR_DC3 equal start line orignally for RUN_BIOS_PATCH_DATA
+                    mov           fsr,w									; fsr = 15h with fsr starting for sdram patch caching
+LOAD_BIOS_PATCH_DATA          mov           w,VAR_DC3							; VAR_DC3 moved w. VAR_DC3 equal start line orignally for LOAD_BIOS_PATCH_DATA
                     call          BIOS_PATCH_DATA
-                    mov           indf,w								; indf ?
-                    inc           fsr
-                    mov           w,#$10
-                    or            fsr,w
-                    inc           VAR_DC3								; +1 VAR_DC3 increased for RUN_BIOS_PATCH_DATA loop pc+w line flow to retw
-                    decsz         VAR_DC1								; -1 VAR_DC1 till 0 then skip RUN_BIOS_PATCH_DATA. has finished RUN_BIOS_PATCH_DATA
-                    jmp           RUN_BIOS_PATCH_DATA
+                    mov           indf,w								; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
+                    inc           fsr									; +1 fsr to step up sdram patch caching
+                    mov           w,#$10								; 10h or so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    or            fsr,w									; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
+                    inc           VAR_DC3								; +1 VAR_DC3 increased for LOAD_BIOS_PATCH_DATA loop pc+w line flow to retw
+                    decsz         VAR_DC1								; -1 VAR_DC1 till 0 then skip LOAD_BIOS_PATCH_DATA. has finished LOAD_BIOS_PATCH_DATA
+                    jmp           LOAD_BIOS_PATCH_DATA
                     clr           fsr
                     snb           VAR_PATCH_FLAGS.2				; jmp TRAY_IS_EJECTED if VAR_PATCH_FLAGS.2 is set
                     page          $0000							; PAGE1
@@ -886,11 +885,11 @@ SECOND_BIOS_PATCH_SYNC_P4_L1          snb           IO_BIOS_OE				; next byte / 
                     jmp           SECOND_BIOS_PATCH_SYNC_P3
 SECOND_BIOS_PATCH_SYNC_P4_L2          sb            IO_BIOS_OE				; skip byte next byte / wait for bios OE high
                     jmp           SECOND_BIOS_PATCH_SYNC_P4_L2
-                    mov           !IO_BIOS_DATA,w							; from above w = 0000 0000 all IO_BIOS_DATA output ? why seems no patch just call RESET_IO_BIOS_DATA_INPUT to reset input.	
+                    mov           !IO_BIOS_DATA,w							; from above w = 0000 0000 all IO_BIOS_DATA output. call RUN_BIOS_PATCHES_SDRAM to send patch.
 SECOND_BIOS_PATCH_SYNC_P4_L3          snb           IO_BIOS_OE				; next byte / wait for bios OE low
                     jmp           SECOND_BIOS_PATCH_SYNC_P4_L3
                     page          $0200							; PAGE2
-                    call          RESET_IO_BIOS_DATA_INPUT
+                    call          RUN_BIOS_PATCHES_SDRAM
                     snb           VAR_SWITCH.4					; jmp FINISHED_RUN_START if VAR_SWITCH.4 is set
                     page          $0600							; PAGE8
                     jmp           FINISHED_RUN_START
@@ -904,8 +903,8 @@ SECOND_BIOS_PATCH_SYNC_P4_L3          snb           IO_BIOS_OE				; next byte / 
 SECONDBIOS_PATCH_DEV1_STACK          mov           w,#$1c
                     mov           fsr,w
                     mov           w,VAR_DC3
-                    mov           indf,w
-                    inc           fsr
+                    mov           indf,w								; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
+                    inc           fsr									; +1 fsr to step up sdram patch caching
                     mov           w,VAR_TOFFSET
                     mov           indf,w
                     clr           fsr
@@ -1000,7 +999,7 @@ POST_PATCH4MODE_START_P2_L3          sb            IO_BIOS_OE				; next byte / w
 POST_PATCH4MODE_END_P1          snb           IO_BIOS_OE				; next byte / wait for bios OE low
                     jmp           POST_PATCH4MODE_END_P1
                     page          $0200							; PAGE2
-                    call          RESET_IO_BIOS_DATA_INPUT
+                    call          RUN_BIOS_PATCHES_SDRAM
                     sb            VAR_PATCH_FLAGS.0
                     page          $0000							; PAGE1
                     jmp           TRAY_IS_EJECTED
@@ -1038,7 +1037,7 @@ BIOS_WAIT_OE_LO_P4          								;todo SX28 define not for sx48
                     ret           
 
 ;--------------------------------------------------------------------------------
-PS2LOGO_PATCH
+PS2LOGO_PATCH			; xcddvdman used to inject logo ?
 ;--------------------------------------------------------------------------------
                     jmp           pc+w
                     retw          $0
@@ -1194,24 +1193,24 @@ PS2LOGO_PATCH_19_20_JMP2          retw          $af					;ALL BIOS PATCH RUN JUST
                     retw          $8
 					
 
-START_PS2LOGO_PATCH          mov           w,#$72			; 72h = 114
+START_PS2LOGO_PATCH_LOAD          mov           w,#$72			; 72h = 114
                     mov           VAR_DC1,w					; VAR_DC1 = 114
                     mov           VAR_DC2,w					; VAR_DC2 = 114
                     clr           w							; 0
                     mov           VAR_DC3,w					; VAR_DC3 = 0
                     mov           w,#$15
-                    mov           fsr,w						; fsr = 15h ?
-RUN_PS2LOGO_PATCH          mov           w,VAR_DC3
+                    mov           fsr,w						; fsr = 15h with fsr starting for sdram patch caching
+PS2LOGO_PATCHLOAD_LOOP          mov           w,VAR_DC3
                     call          PS2LOGO_PATCH
-                    mov           indf,w
-                    inc           fsr
-                    mov           w,#$10
-                    or            fsr,w
+                    mov           indf,w					; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
+                    inc           fsr						; +1 fsr to step up sdram patch caching
+                    mov           w,#$10					; 10h or so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    or            fsr,w						; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
                     inc           VAR_DC3					; +1 VAR_DC3 starting 0
-                    decsz         VAR_DC1					; jmp RUN_PS2LOGO_PATCH till VAR_DC1 = 0 starting 114 ?
-                    jmp           RUN_PS2LOGO_PATCH
+                    decsz         VAR_DC1					; jmp PS2LOGO_PATCHLOAD_LOOP till VAR_DC1 = 0
+                    jmp           PS2LOGO_PATCHLOAD_LOOP
                     clr           fsr						; ?
-                    snb           VAR_SWITCH.3				; jmp POST_PATCH_4_MODE_START2 if VAR_SWITCH.3 set
+                    snb           VAR_SWITCH.3					; jmp POST_PATCH_4_MODE_START2 if VAR_SWITCH.3 set
                     page          $0200						; PAGE2
                     jmp           POST_PATCH_4_MODE_START2
 					
@@ -1220,7 +1219,7 @@ PS1_DETECTED_REBOOT          clr           fsr
                     mov           w,#$6b
                     mov           VAR_DC2,w
                     mov           w,#$8
-                    mov           VAR_PSX_BC,w
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w
                     mov           w,#$e0
                     mov           VAR_PSX_TEMP,w
                     mov           w,#$9d
@@ -1230,7 +1229,7 @@ PS1_DETECTED_REBOOT          clr           fsr
                     snb           VAR_SWITCH.0
                     jmp           PS1_MODE_START
                     mov           w,#$af
-                    mov           VAR_PSX_BC,w
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w
                     mov           w,#$6
                     mov           VAR_PSX_TEMP,w
                     mov           w,#$8
@@ -1282,7 +1281,7 @@ AUTO_REBOOT_PS1MODE          sb            IO_BIOS_CS				; next byte / wait for 
 			
 PS1_MODE_START          snb           IO_BIOS_CS				; next byte / wait for bios CE LOW = BIOS select
                     jmp           AUTO_REBOOT_PS1MODE
-PSX_MODE_START_P2          mov           w,VAR_PSX_BC
+PSX_MODE_START_P2          mov           w,VAR_PSX_BC_CDDVD_TEMP
                     mov           w,IO_BIOS_DATA-w
                     sb            z
                     jmp           PS1_MODE_START
@@ -1319,7 +1318,7 @@ PS1_MODE_L6          sb            IO_BIOS_OE				; next byte / wait for bios OE 
 PS1_MODE_L7          snb           IO_BIOS_OE				; next byte / wait for bios OE low
                     jmp           PS1_MODE_L7
                     page          $0200							; PAGE2
-                    call          RESET_IO_BIOS_DATA_INPUT
+                    call          RUN_BIOS_PATCHES_SDRAM
                     decsz         VAR_TOFFSET
                     jmp           PS1_DETECTED_REBOOT_JMP11to17_ALL
 PS1_MODE_SUCESSFUL_END          setb          VAR_PATCH_FLAGS.0
@@ -1335,7 +1334,7 @@ PS1_MODE_END_MOREBIOSPATCH          mov           w,#$1c
 PS1_CONSOLE_PAL_YFIX          mov           w,#$3c					; todo is yfix pal console as seems no patch data ?
                     mov           IO_BIOS_DATA,w
                     mov           w,#$b
-                    mov           VAR_DC2,w
+                    mov           VAR_DC2,w							; VAR_DC2 = bh = 11
                     mov           w,#$15
                     mov           fsr,w
 PS1_CONSOLE_PAL_YFIX_SYNC          snb           IO_BIOS_OE				; next byte / wait for bios OE low
@@ -1372,7 +1371,7 @@ PS1_CONSOLE_PAL_YFIX_SYNC_L2          sb            IO_BIOS_OE				; next byte / 
 PS1_CONSOLE_PAL_YFIX_SYNC_L3          snb           IO_BIOS_OE				; next byte / wait for bios OE low
                     jmp           PS1_CONSOLE_PAL_YFIX_SYNC_L3
                     page          $0200							; PAGE2
-                    call          RESET_IO_BIOS_DATA_INPUT
+                    call          RUN_BIOS_PATCHES_SDRAM
                     decsz         VAR_TOFFSET
                     jmp           PS1_CONSOLE_PAL_YFIX
 PS1_CONSOLE_NTSC_YFIX          mov           w,#$34
@@ -1619,7 +1618,7 @@ BIOS_PATCH_DEV1 ;  straight patch flow 0 - 118
                     retw          $46		; 117
                     retw          $0		; 118
 					
-DEV1_MODE_START          clrb          VAR_PATCH_FLAGS.2			; VAR_PATCH_FLAGS.2 clrb here related finish mode run ?
+DEV1_MODE_LOAD_START          clrb          VAR_PATCH_FLAGS.2			; VAR_PATCH_FLAGS.2 clrb here related finish mode run ?
                     setb          VAR_PATCH_FLAGS.1
                     setb          VAR_PATCH_FLAGS.0
                     setb          VAR_SWITCH.4
@@ -1628,17 +1627,17 @@ DEV1_MODE_START          clrb          VAR_PATCH_FLAGS.2			; VAR_PATCH_FLAGS.2 c
                     clr           w
                     mov           VAR_DC3,w				; VAR_DC3 = 0
                     mov           w,#$15
-                    mov           fsr,w
-DEV1_MODE_RUN_PATCH          mov           w,VAR_DC3
+                    mov           fsr,w						; fsr = 15h with fsr starting for sdram patch caching
+DEV1_MODE_LOAD_LOOP          mov           w,VAR_DC3
                     call          BIOS_PATCH_DEV1
-                    mov           indf,w
-                    inc           fsr
-                    mov           w,#$10
-                    or            fsr,w
-                    inc           VAR_DC3				; + 1 VAR_DC3 starting 0 above
-                    decsz         VAR_DC1				; jmp DEV1_MODE_RUN_PATCH till VAR_DC1 = 0 start 119
-                    jmp           DEV1_MODE_RUN_PATCH
-                    page          $0200							; PAGE2
+                    mov           indf,w					; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
+                    inc           fsr						; +1 fsr to step up sdram patch caching
+                    mov           w,#$10					; 10h or so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    or            fsr,w						; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
+                    inc           VAR_DC3					; + 1 VAR_DC3 starting 0 above
+                    decsz         VAR_DC1					; jmp DEV1_MODE_LOAD_LOOP till VAR_DC1 = 0 start 119
+                    jmp           DEV1_MODE_LOAD_LOOP
+                    page          $0200								; PAGE2
                     jmp           CHECK_IF_V1_v2or3_V4_V5to8
 
 ;--------------------------------------------------------------------------------
@@ -1705,10 +1704,10 @@ V1toV8_AND_BYTE_SYNC1_L1          snb           IO_CDDVD_OE_A_1Q
                     nop           
                     setb          IO_CDDVD_OE_A_1R
                     and           w,IO_CDDVD_BUS					; The instruction and performs bit-wise AND operation on its operands.
-                    mov           VAR_PSX_BC,w						; w and moved to VAR_PSX_BC
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w						; w and moved to VAR_PSX_BC_CDDVD_TEMP
                     mov           w,#$90							; 1001 0000
-                    mov           w,VAR_PSX_BC-w					; when VAR_PSX_BC which has been and = 1001 0000
-                    sb            z									; VAR_PSX_BC and = 1001 0000 skips V1toV8_CONSOLE_CDDVD_START loop meaning on sync
+                    mov           w,VAR_PSX_BC_CDDVD_TEMP-w					; when VAR_PSX_BC_CDDVD_TEMP which has been and = 1001 0000
+                    sb            z									; VAR_PSX_BC_CDDVD_TEMP and = 1001 0000 skips V1toV8_CONSOLE_CDDVD_START loop meaning on sync
                     jmp           V1toV8_CONSOLE_CDDVD_START		; restart sync to start, V1toV8_CONSOLE_CDDVD_START if not on sync. would loop here till gets least one and = 1001 0000
                     decsz         VAR_DC1							; VAR_DC1 = 4 cycles V1toV8_AND_BYTE_SYNC1 counting down so 4x and = 1001 0000
                     jmp           V1toV8_AND_BYTE_SYNC1				; jmp V1toV8_AND_BYTE_SYNC1 if VAR_DC1 not 0
@@ -1722,25 +1721,25 @@ V9toV12_AND_BYTE_SYNC1_L1          snb           IO_CDDVD_OE_A_1Q
                     jmp           V9toV12_AND_BYTE_SYNC1_L1
                     clrb          IO_CDDVD_OE_A_1R
                     and           w,IO_CDDVD_BUS					; The instruction and performs bit-wise AND operation on its operands.
-                    mov           VAR_PSX_BC,w						; w and moved to VAR_PSX_BC
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w						; w and moved to VAR_PSX_BC_CDDVD_TEMP
                     setb          IO_CDDVD_OE_A_1R
                     mov           w,#$a0							; 1010 0000
-                    mov           w,VAR_PSX_BC-w					; when VAR_PSX_BC which has been and = 1010 0000
-                    sb            z									; VAR_PSX_BC and = 1010 0000 skips V9toV12_AND_BYTE_SYNC1 loop1 meaning on sync start
+                    mov           w,VAR_PSX_BC_CDDVD_TEMP-w					; when VAR_PSX_BC_CDDVD_TEMP which has been and = 1010 0000
+                    sb            z									; VAR_PSX_BC_CDDVD_TEMP and = 1010 0000 skips V9toV12_AND_BYTE_SYNC1 loop1 meaning on sync start
                     jmp           V9toV12_AND_BYTE_SYNC1
                     mov           w,#$b0
 V9toV12_AND_BYTE_SYNC1_L3          snb           IO_CDDVD_OE_A_1Q
                     jmp           V9toV12_AND_BYTE_SYNC1_L3
                     clrb          IO_CDDVD_OE_A_1R
                     and           w,IO_CDDVD_BUS
-                    mov           VAR_PSX_BC,w
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w
                     setb          IO_CDDVD_OE_A_1R
                     mov           w,#$b0							; 1011 0000
-                    mov           w,VAR_PSX_BC-w					
+                    mov           w,VAR_PSX_BC_CDDVD_TEMP-w					
                     snb           z									; jmp V9toV12_AND_BYTE_SYNC2 if AND = 1011 0000
                     jmp           V9toV12_AND_BYTE_SYNC2
                     mov           w,#$0								; 0000 0000
-                    mov           w,VAR_PSX_BC-w
+                    mov           w,VAR_PSX_BC_CDDVD_TEMP-w
                     sb            z									; skip jmp V9toV12_AND_BYTE_SYNC1 if AND = 0
                     jmp           V9toV12_AND_BYTE_SYNC1
 V9toV12_AND_BYTE_SYNC2          mov           w,#$b0
@@ -1748,14 +1747,14 @@ V9toV12_AND_BYTE_SYNC2_L1          snb           IO_CDDVD_OE_A_1Q
                     jmp           V9toV12_AND_BYTE_SYNC2_L1
                     clrb          IO_CDDVD_OE_A_1R
                     and           w,IO_CDDVD_BUS
-                    mov           VAR_PSX_BC,w
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w
                     setb          IO_CDDVD_OE_A_1R
                     mov           w,#$b0
-                    mov           w,VAR_PSX_BC-w
+                    mov           w,VAR_PSX_BC_CDDVD_TEMP-w
                     snb           z
                     jmp           V9toV12_CONSOLE_PATCH1_POST
                     mov           w,#$a0
-                    mov           w,VAR_PSX_BC-w
+                    mov           w,VAR_PSX_BC_CDDVD_TEMP-w
                     sb            z
                     jmp           V9toV12_AND_BYTE_SYNC1
                     snb           VAR_PATCH_FLAGS.2				; jmp PS2_MODE_RB_IO_SET_SLEEP if VAR_PATCH_FLAGS.2 is set
@@ -1903,8 +1902,8 @@ RUN_CDDVD_PATCH_NIBBLE          snb           IO_CDDVD_OE_A_1Q			; jmp RUN_CDDVD
                     jmp           RUN_CDDVD_PATCH_NIBBLE
                     mov           IO_CDDVD_BUS,w
                     clrb          IO_CDDVD_OE_A_1R
-                    mov           VAR_PSX_BC,w				; IO_CDDVD_BUS moved to VAR_PSX_BC
-                    mov           w,<>VAR_PSX_BC			; nibble VAR_PSX_BC into w eg turn 0110 1010 into 1010 0110 just eg not actual value ; hex just swap 2x byte digits shortcut f1 = 1f as same 4x bits just order
+                    mov           VAR_PSX_BC_CDDVD_TEMP,w				; IO_CDDVD_BUS moved to VAR_PSX_BC_CDDVD_TEMP
+                    mov           w,<>VAR_PSX_BC_CDDVD_TEMP			; nibble VAR_PSX_BC_CDDVD_TEMP into w eg turn 0110 1010 into 1010 0110 just eg not actual value ; hex just swap 2x byte digits shortcut f1 = 1f as same 4x bits just order
                     setb          IO_CDDVD_OE_A_1R
 RUN_CDDVD_PATCH_NIBBLE_SEND          snb           IO_CDDVD_OE_A_1Q
                     jmp           RUN_CDDVD_PATCH_NIBBLE_SEND
