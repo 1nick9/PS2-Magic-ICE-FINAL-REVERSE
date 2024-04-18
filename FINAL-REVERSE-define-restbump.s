@@ -618,21 +618,21 @@ BIOS_WAIT_OE_LO_P2          snb           IO_BIOS_OE				; next byte / wait for b
 ;--------------------------------------------------------------------------------
 RUN_BIOS_PATCHES_SDRAM
 ;--------------------------------------------------------------------------------
-NOTCALLED1          mov           w,indf						; sdram address moved to w and output to  IO_BIOS_DATA
+NOTCALLED1          mov           w,indf									; sdram address moved to w and output to  IO_BIOS_DATA
                     mov           IO_BIOS_DATA,w
-                    inc           fsr							; +1 to step through the sdram cached patches
-                    mov           w,#$10						; 10h or so always in sdram address section 6.2.1
-                    or            fsr,w							; so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    inc           fsr										; +1 to step through the sdram cached patches
+                    mov           w,#$10									; 10h or so always in sdram address section 6.2.1
+                    or            fsr,w										; so that ends in top address of registery which is sdram access. bottom 0-f reserved so when gets 1f goes 30h than 20h
 RUN_BIOS_PATCHES_SDRAM_SENDLOOP          snb           IO_BIOS_OE			; next byte / wait for bios OE low
                     jmp           RUN_BIOS_PATCHES_SDRAM_SENDLOOP			; jmp RUN_BIOS_PATCHES_SDRAM_SENDLOOP if IO_BIOS_OE high
-                    decsz         VAR_DC2						; loop calling of sdram cache till VAR_DC2=0 then patch finished, VAR_DC2 set in loading of call here for ea patch
+                    decsz         VAR_DC2									; loop calling of sdram cache till VAR_DC2=0 then patch finished, VAR_DC2 set in loading of call here for ea patch
                     jmp           RUN_BIOS_PATCHES_SDRAM
 END_BIOS_PATCHES_SDRAM_RESET_IO          sb            IO_BIOS_OE			; next byte / wait for bios OE high
                     jmp           END_BIOS_PATCHES_SDRAM_RESET_IO			; jmp END_BIOS_PATCHES_SDRAM_RESET_IO if IO_BIOS_OE high
-                    mov           w,#$ff						; 1111 1111
-                    mov           !IO_BIOS_DATA,w					; all pins Hi-Z input
+                    mov           w,#$ff									; 1111 1111
+                    mov           !IO_BIOS_DATA,w							; all pins Hi-Z input
                     clr           fsr
-                    retp          							; patching done. Return from call
+                    retp          											; patching done. Return from call
 
 ;--------------------------------------------------------------------------------
 BIOS_PATCH_DATA
@@ -813,16 +813,16 @@ V12_CONSOLE_20_BIOS          setb          VAR_PATCH_FLAGS.3
                     mov           w,#$a9
                     mov           VAR_TOFFSET,w
                     mov           w,#$27								; 27h = 39
-ALL_CONTIUNE_BIOS_PATCH          snb           VAR_SWITCH.4						; jmp SECONDBIOS_PATCH_DEV1_STACK if VAR_SWITCH.4 set
+ALL_CONTIUNE_BIOS_PATCH          snb           VAR_SWITCH.4				; jmp SECONDBIOS_PATCH_DEV1_STACK if VAR_SWITCH.4 set
                     jmp           SECONDBIOS_PATCH_DEV1_STACK
                     mov           VAR_DC3,w								; VAR_DC3 27h = 39 start line ?
                     mov           w,#$15
-                    mov           fsr,w									; fsr = 15h with fsr starting for sdram patch caching
-LOAD_BIOS_PATCH_DATA          mov           w,VAR_DC3							; VAR_DC3 moved w. VAR_DC3 equal start line orignally for LOAD_BIOS_PATCH_DATA
+                    mov           fsr,w									; fsr = 15h with fsr starting for sdram patch caching. start 15h due to 10-14 disabled bank 0
+LOAD_BIOS_PATCH_DATA          mov           w,VAR_DC3					; VAR_DC3 moved w. VAR_DC3 equal start line orignally for LOAD_BIOS_PATCH_DATA
                     call          BIOS_PATCH_DATA
                     mov           indf,w								; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
                     inc           fsr									; +1 fsr to step up sdram patch caching
-                    mov           w,#$10								; 10h or so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    mov           w,#$10								; so that ends in top address of registery which is sdram access. bottom 0-f reserved so when gets 1f goes 30h than 20h
                     or            fsr,w									; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
                     inc           VAR_DC3								; +1 VAR_DC3 increased for LOAD_BIOS_PATCH_DATA loop pc+w line flow to retw
                     decsz         VAR_DC1								; -1 VAR_DC1 till 0 then skip LOAD_BIOS_PATCH_DATA. has finished LOAD_BIOS_PATCH_DATA
@@ -1199,18 +1199,18 @@ START_PS2LOGO_PATCH_LOAD          mov           w,#$72			; 72h = 114
                     clr           w							; 0
                     mov           VAR_DC3,w					; VAR_DC3 = 0
                     mov           w,#$15
-                    mov           fsr,w						; fsr = 15h with fsr starting for sdram patch caching
+                    mov           fsr,w						; fsr = 15h with fsr starting for sdram patch caching. start 15h due to 10-14 disabled bank 0
 PS2LOGO_PATCHLOAD_LOOP          mov           w,VAR_DC3
                     call          PS2LOGO_PATCH
                     mov           indf,w					; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
                     inc           fsr						; +1 fsr to step up sdram patch caching
-                    mov           w,#$10					; 10h or so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    mov           w,#$10					; so that ends in top address of registery which is sdram access. bottom 0-f reserved so when gets 1f goes 30h than 20h
                     or            fsr,w						; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
                     inc           VAR_DC3					; +1 VAR_DC3 starting 0
                     decsz         VAR_DC1					; jmp PS2LOGO_PATCHLOAD_LOOP till VAR_DC1 = 0
                     jmp           PS2LOGO_PATCHLOAD_LOOP
                     clr           fsr						; ?
-                    snb           VAR_SWITCH.3					; jmp POST_PATCH_4_MODE_START2 if VAR_SWITCH.3 set
+                    snb           VAR_SWITCH.3				; jmp POST_PATCH_4_MODE_START2 if VAR_SWITCH.3 set
                     page          $0200						; PAGE2
                     jmp           POST_PATCH_4_MODE_START2
 					
@@ -1627,12 +1627,12 @@ DEV1_MODE_LOAD_START          clrb          VAR_PATCH_FLAGS.2			; VAR_PATCH_FLAG
                     clr           w
                     mov           VAR_DC3,w				; VAR_DC3 = 0
                     mov           w,#$15
-                    mov           fsr,w						; fsr = 15h with fsr starting for sdram patch caching
+                    mov           fsr,w						; fsr = 15h with fsr starting for sdram patch caching. start 15h due to 10-14 disabled bank 0
 DEV1_MODE_LOAD_LOOP          mov           w,VAR_DC3
                     call          BIOS_PATCH_DEV1
                     mov           indf,w					; mov value in w from patch data retw to indf which places it in the sdram memory cache as addressed cycling.
                     inc           fsr						; +1 fsr to step up sdram patch caching
-                    mov           w,#$10					; 10h or so that ends in top 8-16 address of registery which is sdram access. bottom 0-7 reserved so when gets 1f goes 30h than 20h
+                    mov           w,#$10					; so that ends in top address of registery which is sdram access. bottom 0-f reserved so when gets 1f goes 30h than 20h
                     or            fsr,w						; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
                     inc           VAR_DC3					; + 1 VAR_DC3 starting 0 above
                     decsz         VAR_DC1					; jmp DEV1_MODE_LOAD_LOOP till VAR_DC1 = 0 start 119
