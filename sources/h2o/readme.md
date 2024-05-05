@@ -7,3 +7,6 @@ the sx28 code is only ment for restbump sx28. i have started porting reverse ove
 i plan to alter this up for prehaps predefined flash config so can use f=tr or even h=rw without worries for all modes.
 
 some quick testing, the dev1 booting is much more stable and with new commenting the payload is altered from final ice.
+
+
+very big thankyou to summ0ne for happily sharing these files :) much respect man, thankyou.
