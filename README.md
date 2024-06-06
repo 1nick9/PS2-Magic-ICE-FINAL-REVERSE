@@ -7,6 +7,10 @@ This is a first coding project for me so please bare with the learning process o
 
 SRC is SX ASM formart. for use directly with SX-Key Editor (official SDK for SX)
 
+some noted differences between ice final and h2o is the ps1 support on ntsc consoles. ice will display ntsc games correctly but no yfix or colour fix for ntsc. h2o all besides 75k fall to pal import fix which make logo and ntsc/pal display incorrectly on ntsc consoles, works properly ntsc/pal on pal consoles (odd boot yfix doesnt take, put in standby and wait 10sec then force ps1 mode and usually takes).
+first edit of h2o is to make flow as ice final does pal/ntsc consoles as same patches just missing jump to skip the pal console only patches for ntsc consoles, tested on jap console only so far n operates as ice final now, pal should do as intended as simple snb edit.
+
+
 Sources:
 Original ICE team site (maybe just mirror)
 https://www.angelfire.com/clone/magicfriend/
