@@ -52,10 +52,10 @@ SOFT_RST = VAR_PATCH_FLAGS.1
 PSX_FLAG = VAR_PATCH_FLAGS.2
 ;psx mode flag	
 ;seems to be ref for mode started and mode end, cleared when finished mode run or on reset if mode was incomplete finish not checking
-;clrb on PS1_BOOT_MODE to set for flow PS1_MODE ?
+;clrb on TAP_BOOT_MODE to set for flow PS1_MODE ?
 
 V10_FLAG = VAR_PATCH_FLAGS.3	;bios 1.9 or 2.0
-;also v11 1.9 bios has own ps1 routine 
+;also v10 1.9 bios has own ps1 routine 
 
 UK_Flag = VAR_PATCH_FLAGS.4
 
@@ -75,7 +75,7 @@ V12Logo_Flag = VAR_SWITCH.1 ;PS1_MODE v12 2.0 bios console flag ?
 ;VAR_SWITCH.2 = not used
 
 X_FLAG = VAR_SWITCH.3 
-;PS2_MODE ref set when TAP_BOOT_MODE only clrb when end ?
+;PS2_MODE ref set when HOLD_BOOT_MODES only clrb when end ?
 ;can flow onto ps1 reboot into PS1_MODE if detect ps1 media
 
 DEV1_Flag = VAR_SWITCH.4
@@ -142,7 +142,7 @@ STARTUP          											;here from stby & wake up...
                     snb           pd
                     jmp           CLEAR_CONSOLE_INFO_PREFIND		;0 = power up from sleep , 1= power up from Power ON (STBY)
                     snb           VAR_PSX_BITC.2
-                    jmp           PS1_BOOT_MODE
+                    jmp           TAP_BOOT_MODE
                     snb           IO_EJECT
                     jmp           TRAY_IS_EJECTED
                     snb           VAR_PSX_BITC.1					;xcdvdman reload check
@@ -409,7 +409,7 @@ BIOS_UK          setb          UK_Flag
                     jmp           RESTDOWN_CHK_PS2MODEorOTHER
 BIOS_JAP          setb          JAP_Flag
 RESTDOWN_CHK_PS2MODEorOTHER          snb           IO_REST
-                    jmp           PS1_BOOT_MODE
+                    jmp           TAP_BOOT_MODE
 ;DVD movie : GREEN fix + MACROVISION off					
 CHECK_IF_V9to14          setb          PSX_FLAG
                     mov           w,#$30							; is bios 2.0 for v12 ;V12 use V910 kernel :)
@@ -551,19 +551,19 @@ MODE_SELECT_START          mov           w,#$a					; 10 ;test RESET for about 2.
 ;test_l1
 MODE_SELECT_TIMER_L1          call          DELAY100m
                     snb           IO_REST
-                    jmp           TAP_BOOT_MODE					
-                    decsz         VAR_DC2						; repeat n jump to TAP_BOOT_MODE if under 1sec so tap
+                    jmp           HOLD_BOOT_MODES					
+                    decsz         VAR_DC2						; repeat n jump to HOLD_BOOT_MODES if under 1sec so tap 1+1=2sec
                     jmp           MODE_SELECT_TIMER_L1					
 MODE_SELECT_TIMER_L2          sb            IO_REST				;wait RESET release
                     jmp           MODE_SELECT_TIMER_L2
                     mov           w,#$5							;debounce RESET for about 0.5 sec
                     mov           VAR_DC2,w
 ;test_l2					
-MODE_SELECT_TIMER_L3          call          DELAY100m			;test RESET again for about 10.0 sec. ;5 + 10 = 1.5s
+MODE_SELECT_TIMER_L3          call          DELAY100m			;test RESET again for about 10.0 sec. ;5 + 20 = 2.5s
                     decsz         VAR_DC2
                     jmp           MODE_SELECT_TIMER_L3
                     mov           w,#$64						;100
-                    mov           VAR_DC2,w						;100+15=115 ? 11.5secs
+                    mov           VAR_DC2,w						;100+15=115 ? 12.5secs
 ;test_l3					
 DISABLE_MODE          call          DELAY100m
                     sb            IO_REST						;resetted ...enter DEV mode
@@ -573,10 +573,10 @@ DISABLE_MODE          call          DELAY100m
                     jmp           DISABLE_MODE					;...sleep chip , can't wake up without put PS2 into stby
                     sleep         
 ;RESET0					
-PS1_BOOT_MODE          clr           fsr
+TAP_BOOT_MODE          clr           fsr
                     clrb          PSX_FLAG
 ;RESET_DOWN					
-TAP_BOOT_MODE          snb           DEV1_Flag				;reenter dev mode if rest in dev mode
+HOLD_BOOT_MODES          snb           DEV1_Flag				;reenter dev mode if rest in dev mode
                     page          $0600
                     jmp           DEV1_MODE_LOAD_START
                     setb          SOFT_RST					;soft reset may need more than 1 disk patch  he he he ....
@@ -600,7 +600,7 @@ CHECK_IF_START_PS2LOGO          clr           fsr
                     jmp           TRAY_IS_EJECTED
 ;CDDVD_EJECTED					
 TRAY_IS_EJECTED          sb            IO_REST				;here from eject
-                    jmp           PS1_BOOT_MODE				;reset ?
+                    jmp           TAP_BOOT_MODE				;reset ?
                     snb           IO_EJECT
                     jmp           TRAY_IS_EJECTED			;wait for tray closed...
 ;wait for bios cs inactive ( fix for  5 bit bus and cd boot )					
@@ -617,7 +617,7 @@ RESUME_MODE_FROM_EJECT_L2          mov           w,#$3b		;load  timer=61,delay =
 RESUME_MODE_FROM_EJECT_L3          sb            IO_BIOS_CS	;wait again 500msec if bios cs active
                     jmp           RESUME_MODE_FROM_EJECT
                     sb            IO_REST					;new reset check here ...	
-                    jmp           PS1_BOOT_MODE
+                    jmp           TAP_BOOT_MODE
                     snb           IO_EJECT
                     jmp           TRAY_IS_EJECTED			;
                     mov           w,rtcc					;wait for timer= 0 ... (don't use TEST RTCC)
