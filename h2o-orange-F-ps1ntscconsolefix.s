@@ -5,18 +5,18 @@
                     ID                    'ICEREV'
 					
 ;DEFINE
-RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. else is compiled as f=tr
+RSTBUMP				= 	1			; uncomment for compiling with restbump for ps1mode. else is compiled as f=tr
 ;USE ONLY IF F=TR commented out RSTBUMP
-;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal aaa45bfc43e3f1786c5fb1fa4e9815f8
-;USAv14			= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa 15aca3108d239eb682f27d17cc1ed3d1
-;JAPv14			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap 9b55a672a34c1d54e712ec6859f927dd
+;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal					f=tr 75k pal aaa45bfc43e3f1786c5fb1fa4e9815f8
+;USAv14				= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa 15aca3108d239eb682f27d17cc1ed3d1
+;JAPv14				= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap 9b55a672a34c1d54e712ec6859f927dd
 
 ;io pin assignments
 IO_SCEX				=		ra.2 ; (PSX:SCEx)RA2(S)
 IO_BIOS_OE			=		ra.0 ; (R)
-IO_BIOS_CS			=		rb.1 ; (W)					; LOW = BIOS select ; 1 = no access to rom , 0 = access to rom
-IO_REST				=		rb.2 ; 						; 1 = normal , 0 = reset
-IO_EJECT			=		rb.3 ; (PS2:EJECT)RB3(Z) 			;  1 = tray open , 0 = tray closed
+IO_BIOS_CS			=		rb.1 ; (W)	; LOW = BIOS select ; 1 = no access to rom , 0 = access to rom
+IO_REST				=		rb.2 ; 		; 1 = normal , 0 = reset
+IO_EJECT			=		rb.3 ; (PS2:EJECT)RB3(Z) ;  1 = tray open , 0 = tray closed
 IO_CDDVD_OE_A_1Q		=		ra.1 ; (CDDVD:OE)RA1(A) (flipflop 1Q#) ;A from flip flop
 IO_CDDVD_OE_A_1R		=		ra.3 ; (CDDVD:OE)RA3(A) (flipflop 1R#) ;flip flop clr
 IO_CDDVD_BUS_i			=		rb.7 ; (I)(CDDVD:D7)
