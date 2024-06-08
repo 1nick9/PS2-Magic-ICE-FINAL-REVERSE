@@ -5,11 +5,11 @@
                     ID                    'ICEREV'
 					
 ;DEFINE
-RSTBUMP			EQU 1			; uncomment for compiling with restbump for ps1mode. else is compiled as f=tr
+RSTBUMP			= 1			; uncomment for compiling with restbump for ps1mode. else is compiled as f=tr
 ;USE ONLY IF F=TR commented out RSTBUMP
 ;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal aaa45bfc43e3f1786c5fb1fa4e9815f8
-;USAv14			EQU 1			;uncomment for fixed 75k being usa region. all prior still work any region					f=tr 75k usa 15aca3108d239eb682f27d17cc1ed3d1
-;JAPv14			EQU 1			;uncomment for fixed 75k being jap region. all prior still work any region					f=tr 75k jap 9b55a672a34c1d54e712ec6859f927dd
+;USAv14			= 1			;uncomment for fixed 75k being usa region. all prior still work any region					f=tr 75k usa 15aca3108d239eb682f27d17cc1ed3d1
+;JAPv14			= 1			;uncomment for fixed 75k being jap region. all prior still work any region					f=tr 75k jap 9b55a672a34c1d54e712ec6859f927dd
 
 ;io pin assignments
 IO_SCEX				=		ra.2 ; (PSX:SCEx)RA2(S)
@@ -22,27 +22,29 @@ IO_CDDVD_OE_A_1R		=		ra.3 ; (CDDVD:OE)RA3(A) (flipflop 1R#) ;flip flop clr
 IO_CDDVD_BUS_i			=		rb.7 ; (I)(CDDVD:D7)
 IO_CDDVD_BUS_b			=		rb.4 ; (B)(CDDVD:D2)
 IO_CDDVD_BUS_f			=		rb.0 ; (F)(just used for usa v14 jmp or clash with f=tr on v14 usa)
-IO_CDDVD_BUS_h			=		rb.6 ; (H)(how determins is jap v14 if connected, assumption is no RW support at all on v14 unless sync works out for when checked)
+IO_CDDVD_BUS_h			=		rb.6 ; (H)(how determins is jap v14 if connected, assumption is no RW support at all on v14 RSTBUMP unless sync works out for when checked)
 IO_CDDVD_BUS			=		rb   ; $06
 IO_BIOS_DATA			=		rc   ; $07 ; (V)RC0(BIOS:D0) - (M)RC7(BIOS:D7)
 
 ;regs
-VAR_DC1				equ		$08 ; DS 1 ; delay counter 1(small)
-VAR_DC2				equ		$09 ; DS 1 ; delay counter 2(small)
-VAR_DC3				equ		$0A ; DS 1 ; delay counter 3(big)
-VAR_TOFFSET			equ		$0b ; DS 1 ; table offset
-VAR_PSX_TEMP			equ		$0C ; DS 1 ; SEND_SCEX:  rename later
-VAR_PSX_BC_CDDVD_TEMP		equ		$14 ; DS 1 ; SEND_SCEX:  byte counter  note start at 4(works down to 0) ; also used with mechacon patches and ps1 detect
-VAR_PSX_BYTE			equ		$0D ; DS 1 ; SEND_SCEX:  byte(to send)
-VAR_PSX_BITC			equ		$13 ; DS 1 ; SEND_SCEX:  bit counter ;note start at 8(works down to 0)
-VAR_BIOS_REV			equ		$10 ; DS 1 ; 1.X0 THE BIOS REVISION byte infront in BIOS string is X.00
-VAR_BIOS_YR			equ		$11 ; DS 1 ; byteC of ;BIOS_VERSION_MATCHING
-VAR_BIOS_REGION_TEMP		equ		$12 ; DS 1 ; temp storage to compare byte7 of ;BIOS_VERSION_MATCHING
-VAR_SWITCH			equ		$0F ; DS 1 ; ? 0.94 comment ; bit 0=xcddvdman mode + PSX1 region switch, 1=PSX1/PSX2 wakeup mode, 2=PSX1 PAL/NTSC , 3=PSX2 logo patch , 4=DEV1 
-VAR_PATCH_FLAGS			equ		$0E ; DS 1 ; appears to be bits set for running patch routines .0-.7 for setb an offset
+VAR_DC1				=		$08 ; DS 1 ; delay counter 1(small)
+VAR_DC2				=		$09 ; DS 1 ; delay counter 2(small)
+VAR_DC3				=		$0A ; DS 1 ; delay counter 3(big)
+VAR_DC4			=		$0b ; DS 1 ; delay counter 4
+VAR_PSX_TEMP			=		$0C ; DS 1 ; SEND_SCEX:  rename later
+VAR_PSX_BYTE			=		$0D ; DS 1 ; SEND_SCEX:  byte(to send)
+VAR_PATCH_FLAGS			=		$0E ; DS 1
+VAR_SWITCH			=		$0F ; DS 1
+VAR_BIOS_REV			=		$10 ; DS 1 ; 1.X0 THE BIOS REVISION byte infront in BIOS string is X.00
+VAR_BIOS_YR			=		$11 ; DS 1 ; byteC of ;BIOS_VERSION_MATCHING
+VAR_BIOS_REGION_TEMP		=		$12 ; DS 1 ; temp storage to compare byte7 of ;BIOS_VERSION_MATCHING
+VAR_PSX_BITC			=		$13 ; DS 1 ; SEND_SCEX:  bit counter ;note start at 8(works down to 0)
+VAR_PSX_BC_CDDVD_TEMP		=		$14 ; DS 1 ; SEND_SCEX:  byte counter  note start at 4(works down to 0) ; also used with mechacon patches and ps1 detect
+
 
 ;------------------------------------------------------------
-
+;VAR_PATCH_FLAGS
+;------------------------------------------------------------
 EJ_FLAG = VAR_PATCH_FLAGS.0
 ;bit 0 used by eject routine
 
@@ -51,38 +53,42 @@ SOFT_RST = VAR_PATCH_FLAGS.1
 
 PSX_FLAG = VAR_PATCH_FLAGS.2
 ;psx mode flag	
-;seems to be ref for mode started and mode end, cleared when finished mode run or on reset if mode was incomplete finish not checking
-;clrb on TAP_BOOT_MODE to set for flow PS1_MODE ?
 
 V10_FLAG = VAR_PATCH_FLAGS.3	;bios 1.9 or 2.0
 ;also v10 1.9 bios has own ps1 routine 
 
-UK_Flag = VAR_PATCH_FLAGS.4
+UK_FLAG = VAR_PATCH_FLAGS.4
 
-USA_Flag = VAR_PATCH_FLAGS.5
+USA_FLAG = VAR_PATCH_FLAGS.5
 
-JAP_Flag = VAR_PATCH_FLAGS.6
+JAP_FLAG = VAR_PATCH_FLAGS.6
 
 SCEX_FLAG = VAR_PATCH_FLAGS.7
 ;set when SCEX_LOW loop for injecting. once cleared knows patching done to flow forward
 
 ;------------------------------------------------------------
+;VAR_SWITCH
+;------------------------------------------------------------
 V12_FLAG = VAR_SWITCH.0 ;v12 console 2.0 bios set
 
-V12Logo_Flag = VAR_SWITCH.1 ;PS1_MODE v12 2.0 bios console flag ?
+V12LOGO_FLAG = VAR_SWITCH.1 ;PS1_MODE v12 2.0 bios console flag ?
 ;SECOND_BIOS_PATCH_END ref if was doing ps1 patching for 2.0 v12 as redirects flow there for different patch. 
 
 ;VAR_SWITCH.2 = not used
 
 X_FLAG = VAR_SWITCH.3 
-;PS2_MODE ref set when HOLD_BOOT_MODES only clrb when end ?
+;set when HOLD_BOOT_MODES only clrb when end ?
 ;can flow onto ps1 reboot into PS1_MODE if detect ps1 media
 
-DEV1_Flag = VAR_SWITCH.4
+DEV1_FLAG = VAR_SWITCH.4
 
-V14_Flag = VAR_SWITCH.5
+V14_FLAG = VAR_SWITCH.5
 ;set due to W for region of BIOS which decka models
-;-------------------------------------------------------------
+
+
+;------------------------------------------------------------
+;CODE
+;------------------------------------------------------------
 
 ;mode setup for io's ;todo
 ;ref SX-SX-Users-Manual-R3.1.pdf section 5.3.2
@@ -256,23 +262,23 @@ SCEx_DATA
 ;--------------------------------------------------------------------------------
 SEND_SCEX
 ;--------------------------------------------------------------------------------
-                    snb           JAP_Flag
+                    snb           JAP_FLAG
                     jmp           jap
-                    snb           UK_Flag
+                    snb           UK_FLAG
                     jmp           uk
-                    clr           VAR_TOFFSET
+                    clr           VAR_DC4
                     jmp           usa
 uk          mov           w,#$8
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     jmp           usa
 jap          mov           w,#$4
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     jmp           usa
 usa          mov           w,#$4
                     mov           VAR_PSX_BC_CDDVD_TEMP,w
                     mov           w,#$b
                     mov           !ra,w
-next_byte          mov           w,VAR_TOFFSET
+next_byte          mov           w,VAR_DC4
                     call          SCEx_DATA
                     mov           VAR_PSX_BYTE,w
                     not           VAR_PSX_BYTE
@@ -290,14 +296,14 @@ send          rr            VAR_PSX_BYTE
 hi          call          SCEX_HI
 next2          decsz         VAR_PSX_BITC
                     jmp           send
-                    inc           VAR_TOFFSET
+                    inc           VAR_DC4
                     decsz         VAR_PSX_BC_CDDVD_TEMP
                     jmp           next_byte
                     clrb          IO_SCEX
                     mov           w,#$16
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
 send_end          call          SCEX_LOW
-                    decsz         VAR_TOFFSET
+                    decsz         VAR_DC4
                     jmp           send_end
                     mov           w,#$f
                     mov           !ra,w
@@ -387,9 +393,9 @@ CHECK_BYTE_AB_REGION_CAPTURE_YR          snb           IO_BIOS_OE				; next byte
                     snb           z								;if compare dont = 0 (C) skip next line
                     jmp           BIOS_UK
                     jmp           BIOS_JAP					; no match on byte7 compares, assumed is jap region
-BIOS_USA          setb          USA_Flag
+BIOS_USA          setb          USA_FLAG
                     jmp           RESTDOWN_CHK_PS2MODEorOTHER
-BIOS_V14          setb          V14_Flag
+BIOS_V14          setb          V14_FLAG
 	
 	IFDEF	RSTBUMP
                     clrb          IO_CDDVD_OE_A_1R
@@ -405,9 +411,9 @@ BIOS_V14          setb          V14_Flag
 	jmp           BIOS_JAP
 	ENDIF
 	
-BIOS_UK          setb          UK_Flag
+BIOS_UK          setb          UK_FLAG
                     jmp           RESTDOWN_CHK_PS2MODEorOTHER
-BIOS_JAP          setb          JAP_Flag
+BIOS_JAP          setb          JAP_FLAG
 RESTDOWN_CHK_PS2MODEorOTHER          snb           IO_REST
                     jmp           TAP_BOOT_MODE
 ;DVD movie : GREEN fix + MACROVISION off					
@@ -424,7 +430,7 @@ CHECK_IF_V9to14          setb          PSX_FLAG
                     mov           w,VAR_BIOS_REV-w
                     snb           z
                     jmp           START_BIOS_PATCH_SYNC_V9toV14
-                    snb           V14_Flag							; is v14 flag set from W region, should work all decka 75k+
+                    snb           V14_FLAG							; is v14 flag set from W region, should work all decka 75k+
                     jmp           START_BIOS_PATCH_SYNC_V9toV14		
 ;V1-8 kernels: sync 1E006334 then 2410 					
                     mov           w,#$32							; v1-8 bios VAR_DC1 set fall over no match for
@@ -546,7 +552,7 @@ BIOS_V9toV14_PATCH1          snb           IO_BIOS_OE
 ;definitively SLEEP chip for all media that no need patch ( VIDEO , MUSIC , ORIGINALS ).
 ;**************************************************************************************************			
 ;TEST_RESET
-MODE_SELECT_START          mov           w,#$a					; 10 ;test RESET for about 2.0 sec
+MODE_SELECT_START          mov           w,#$a					; 10x100ms ;test RESET for about 1sec
                     mov           VAR_DC2,w
 ;test_l1
 MODE_SELECT_TIMER_L1          call          DELAY100m
@@ -554,18 +560,18 @@ MODE_SELECT_TIMER_L1          call          DELAY100m
                     jmp           HOLD_BOOT_MODES					
                     decsz         VAR_DC2						; repeat n jump to HOLD_BOOT_MODES if under 1sec so tap 1+1=2sec
                     jmp           MODE_SELECT_TIMER_L1					
-MODE_SELECT_TIMER_L2          sb            IO_REST				;wait RESET release
+MODE_SELECT_TIMER_L2          sb            IO_REST				;wait RESET release for PS1_MODE
                     jmp           MODE_SELECT_TIMER_L2
-                    mov           w,#$5							;debounce RESET for about 0.5 sec
+                    mov           w,#$5							;debounce RESET for about 0.5 sec buffer for not exact 2sec hold
                     mov           VAR_DC2,w
 ;test_l2					
-MODE_SELECT_TIMER_L3          call          DELAY100m			;test RESET again for about 10.0 sec. ;5 + 20 = 2.5s
+MODE_SELECT_TIMER_L3          call          DELAY100m			;test RESET again for about 10.0 sec.
                     decsz         VAR_DC2
                     jmp           MODE_SELECT_TIMER_L3
                     mov           w,#$64						;100
-                    mov           VAR_DC2,w						;100+15=115 ? 12.5secs
+                    mov           VAR_DC2,w						;100+25=125  12.5secs 
 ;test_l3					
-DISABLE_MODE          call          DELAY100m
+DISABLE_MODE          call          DELAY100m					;10secs = DISABLE_MODE but 2.5secs for retap of reset for DEV1
                     sb            IO_REST						;resetted ...enter DEV mode
                     page          $0600
                     jmp           DEV1_MODE_LOAD_START
@@ -576,13 +582,13 @@ DISABLE_MODE          call          DELAY100m
 TAP_BOOT_MODE          clr           fsr
                     clrb          PSX_FLAG
 ;RESET_DOWN					
-HOLD_BOOT_MODES          snb           DEV1_Flag				;reenter dev mode if rest in dev mode
+HOLD_BOOT_MODES          snb           DEV1_FLAG				;reenter dev mode if rest in dev mode
                     page          $0600
                     jmp           DEV1_MODE_LOAD_START
                     setb          SOFT_RST					;soft reset may need more than 1 disk patch  he he he ....
                     clrb          EJ_FLAG
                     setb          X_FLAG					;first XMAN patch flag
-                    clrb          V12Logo_Flag				;clear V12 logo flag patch
+                    clrb          V12LOGO_FLAG				;clear V12 logo flag patch
                     page          $0200
                     jmp           PS2_MODE_START			;PS2 osd patch or PS1DRV init... (based on psx_flag status)
 					
@@ -629,17 +635,17 @@ RESUME_MODE_FROM_EJECT_L3          sb            IO_BIOS_CS	;wait again 500msec 
                     jmp           RESUME_MODE_FROM_EJECT_L1
                     call          SET_INTRPT				;better here ....
                     clr           fsr
-                    snb           DEV1_Flag
+                    snb           DEV1_FLAG
                     page          $0600
                     jmp           START_CDDVD_PATCH			;patch media for DEVMODE
                     mov           w,#$2
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$32					;ASCI 2
                     mov           w,VAR_BIOS_YR-w			; is 2002 Year console
                     snb           z
                     jmp           CONSOLE_2002_JMP			;# of ps2logo patch for PS2 V7
                     mov           w,#$1
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
 ;MEPATCH					
 CONSOLE_2002_JMP          page          $0600
                     jmp           START_CDDVD_PATCH			;patch ps2 CD/DVD
@@ -665,18 +671,18 @@ RUN_PS1_SCEX_INJECT          call          SEND_SCEX
 PS1_SCEX_INJECT_COMPLETE          snb           EJ_FLAG
                     jmp           RUN_PS1_SCEX_INJECT		;send all scex after bios patch then sleep
                     mov           w,#$2
-                    mov           VAR_TOFFSET,w				;# of PS1DRV patch for PS2 V7
+                    mov           VAR_DC4,w				;# of PS1DRV patch for PS2 V7
                     mov           w,#$32
                     mov           w,VAR_BIOS_YR-w
                     snb           z
                     jmp           PS1_IS_V14orV1toV12PALorNTSC
                     mov           w,#$1
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
 ;DRV					
 PS1_IS_V14orV1toV12PALorNTSC
-                    snb           V14_Flag					; check if V14_Flag set meaning v14/75k decka
+                    snb           V14_FLAG					; check if V14_FLAG set meaning v14/75k decka
                     jmp           PS1_V14_PATCH
-                    snb           UK_Flag					; fix for ntsc/pal ps1 route v1-12
+                    snb           UK_FLAG					; fix for ntsc/pal ps1 route v1-12
                     page          $0400
                     jmp           PS1_CONSOLE_PAL_YFIX		; jmp to pal start if pal console
                     page          $0400
@@ -863,7 +869,7 @@ PS2_MODE_START
                     clr           fsr
                     sb            PSX_FLAG
                     jmp           CHECK_IF_V1_v2or3_V4_V5to8				;ps2 mode selected , skip 
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     page          $0400
                     jmp           PS2LOGO_PATCHLOAD_22_JMP1
                     mov           w,#$b
@@ -874,7 +880,7 @@ PS2_MODE_START
 CHECK_IF_V1_v2or3_V4_V5to8
 ;ps2 mode data offset 
                     clr           fsr
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     jmp           CHECK_V9to14_REV			;jmp CHECK_V9to14_REV if CHECK_V9to14_REV set meaning W v14/75k+
                     mov           w,#$31					;ascii 1
                     mov           w,VAR_BIOS_REV-w			;does VAR_BIOS_REV = 1		;v1
@@ -895,7 +901,7 @@ V1_CONSOLE_11_BIOS          mov           w,#$c0
                     mov           w,#$b0
                     mov           VAR_DC3,w
                     mov           w,#$74
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     jmp           V1to8_CONTIUNE
 ;:set_V3					
 V2or3_CONSOLE_12_BIOS          mov           w,#$d8
@@ -903,13 +909,13 @@ V2or3_CONSOLE_12_BIOS          mov           w,#$d8
                     mov           w,#$40
                     mov           VAR_DC3,w
                     mov           w,#$7a
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     jmp           V1to8_CONTIUNE
 ;:set_V4					
 V4_CONSOLE_15_BIOS          mov           w,#$60
                     mov           VAR_DC3,w
                     mov           w,#$7d
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$c
                     mov           IO_BIOS_DATA,w
 ;:set_P					
@@ -943,23 +949,23 @@ CHECK_V9to14_REV          mov           w,#$2
                     mov           w,#$30
                     mov           VAR_DC3,w
                     mov           w,#$7d
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$7						; V5678
                     jmp           ALL_CONTIUNE_BIOS_PATCH
 ;:set_V9					
 V9_CONSOLE_17_BIOS          mov           w,#$4
                     mov           VAR_DC3,w
                     mov           w,#$94
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$17
                     jmp           ALL_CONTIUNE_BIOS_PATCH
 ;:set_V14					
 V14_CONSOLE_22_BIOS          setb          V10_FLAG
-                    setb          V14_Flag
+                    setb          V14_FLAG
                     mov           w,#$d4
                     mov           VAR_DC3,w
                     mov           w,#$a9
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$27
                     jmp           ALL_CONTIUNE_BIOS_PATCH
 ;:set_V10					
@@ -967,7 +973,7 @@ V9_CONSOLE_19_BIOS          setb          V10_FLAG
                     mov           w,#$64
                     mov           VAR_DC3,w
                     mov           w,#$9e
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$37
                     jmp           ALL_CONTIUNE_BIOS_PATCH
 ;:set_V12					
@@ -976,10 +982,10 @@ V12_CONSOLE_20_BIOS          setb          V10_FLAG
                     mov           w,#$7c
                     mov           VAR_DC3,w
                     mov           w,#$a9
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
                     mov           w,#$37
 ;:loopxx					
-ALL_CONTIUNE_BIOS_PATCH          snb           DEV1_Flag
+ALL_CONTIUNE_BIOS_PATCH          snb           DEV1_FLAG
                     jmp           SECONDBIOS_PATCH_DEV1_STACK
                     mov           VAR_DC3,w
                     mov           w,#$15
@@ -1066,10 +1072,10 @@ SECOND_BIOS_PATCH_SYNC_P4_L3          snb           IO_BIOS_OE
                     jmp           SECOND_BIOS_PATCH_SYNC_P4_L3
                     page          $0200
                     call          RUN_BIOS_PATCHES_SRAM
-                    snb           DEV1_Flag
+                    snb           DEV1_FLAG
                     page          $0600
                     jmp           FINISHED_RUN_START
-                    snb           V12Logo_Flag
+                    snb           V12LOGO_FLAG
                     page          $0400
                     jmp           PS1_MODE_SUCESSFUL_END			;logo patch for V12
                     page          $0000
@@ -1081,7 +1087,7 @@ SECONDBIOS_PATCH_DEV1_STACK          mov           w,#$1c
                     mov           w,VAR_DC3
                     mov           indf,w
                     inc           fsr
-                    mov           w,VAR_TOFFSET
+                    mov           w,VAR_DC4
                     mov           indf,w
                     clr           fsr
                     mov           w,#$4
@@ -1130,11 +1136,11 @@ Label_0097          mov           w,#$34				; ? likely some 75k patches?
 POST_PATCH_4_MODE_START          page          $0000							; PAGE1
                     call          SET_INTRPT
 ;IS_XCDVDMAN					
-POST_PATCH_4_MODE_START2          snb           DEV1_Flag
+POST_PATCH_4_MODE_START2          snb           DEV1_FLAG
                     page          $0600
                     jmp           FINISHED_RUN_START_P2
                     mov           w,#$64							; 100
-                    mov           VAR_TOFFSET,w						; 30-35 sec wait for BIOS
+                    mov           VAR_DC4,w						; 30-35 sec wait for BIOS
 ;IS_XCDVDMAN:loop4
 POST_PATCH_4_MODE_START_L1          mov           w,#$ff
                     mov           VAR_DC3,w
@@ -1153,7 +1159,7 @@ POST_PATCH_4_MODE_START_L4          sb            IO_BIOS_CS
                     jmp           POST_PATCH_4_MODE_START_L3
                     decsz         VAR_DC3
                     jmp           POST_PATCH_4_MODE_START_L2
-                    decsz         VAR_TOFFSET
+                    decsz         VAR_DC4
                     jmp           POST_PATCH_4_MODE_START_L1
                     jmp           PS2_MODE_RB_IO_SET_SLEEP			; no xcdvdman reload ...
 					
@@ -1280,7 +1286,7 @@ PS2LOGO_PATCH
 					
                     mov           w,#$33							;51
                     mov           VAR_DC3,w
-                    sb            V14_Flag
+                    sb            V14_FLAG
                     jmp           PS2LOGO_PATCH_not22_JMP1
 ;v14?				
                     mov           w,#$d								;13
@@ -1319,7 +1325,7 @@ PS2LOGO_PATCH
                     retw          $8
                     mov           w,#$46							;70
                     mov           VAR_DC3,w
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     jmp           PS2LOGO_PATCH_22_JMP2
 ;not v14 patches, how flows?					
                     mov           w,#$33							;51
@@ -1478,7 +1484,7 @@ PS2LOGO_PATCHLOAD_22_JMP1          mov           w,#$27				;39
 ;XMAN?					
 START_PS2LOGO_PATCH_LOAD          mov           w,#$7b				;123
                     mov           VAR_DC1,w
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     jmp           PS2LOGO_PATCHLOAD_22_JMP2
                     mov           w,#$6e							;110
                     mov           VAR_DC1,w
@@ -1518,7 +1524,7 @@ PS1_DETECTED_REBOOT          clr           fsr
                     mov           VAR_PSX_BITC,w
                     mov           w,#$0
                     mov           IO_BIOS_DATA,w
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     jmp           PS1_DETECTED_REBOOT_JMP20to22
 ;load regs with v12 logo sync					
                     mov           w,#$67							;107
@@ -1622,7 +1628,7 @@ PS1_MODE_L4          snb           IO_BIOS_OE
                     jmp           PS1_MODE_START
                     mov           w,#$1b
                     mov           fsr,w
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     jmp           PS1_MODE_L5
                     snb           V12_FLAG
                     jmp           PS1_MODE_v12_PATCHS
@@ -1643,7 +1649,7 @@ PS1_MODE_L7          snb           IO_BIOS_OE
                     jmp           PS1_MODE_L7
                     page          $0200
                     call          RUN_BIOS_PATCHES_SRAM
-                    decsz         VAR_TOFFSET
+                    decsz         VAR_DC4
                     jmp           PS1_DETECTED_REBOOT_JMP11to17_ALL		;patch logo 2 times for V7 only !
 ;PS2_PS2LOGO:back					
 PS1_MODE_SUCESSFUL_END          snb           PSX_FLAG
@@ -1655,7 +1661,7 @@ PS1_MODE_SUCESSFUL_END          snb           PSX_FLAG
 ;V12 logo sync					
 PS1_MODE_v12_PATCHS          mov           w,#$1c
                     mov           fsr,w
-                    setb          V12Logo_Flag
+                    setb          V12LOGO_FLAG
                     page          $0200
                     jmp           SECOND_BIOS_PATCH_SYNC_P2
 					
@@ -1708,14 +1714,14 @@ PS1_CONSOLE_PAL_YFIX_SYNC_L3          snb           IO_BIOS_OE
                     jmp           PS1_CONSOLE_PAL_YFIX_SYNC_L3
                     page          $0200
                     call          RUN_BIOS_PATCHES_SRAM
-                    decsz         VAR_TOFFSET
+                    decsz         VAR_DC4
                     jmp           PS1_CONSOLE_PAL_YFIX
 ;LOGO					
 PS1_CONSOLE_ALL_JMPNTSC          mov           w,#$34								; should jmp here for ntsc but is no flow to here besides via ps1 hence poor ntsc console ps1 support h2o. is no ntsc yfix
                     mov           VAR_DC1,w
                     mov           w,#$18
                     mov           VAR_DC3,w
-                    mov           VAR_TOFFSET,w
+                    mov           VAR_DC4,w
 ;logo_l1															;match FDFF8514
 PS1_CONSOLE_ALL_JMPNTSC_SYNC          snb           IO_BIOS_OE
                     jmp           PS1_CONSOLE_ALL_JMPNTSC_SYNC
@@ -1802,7 +1808,7 @@ PS1_CONSOLE_ALL_JMPNTSC_SYNC3          sb            IO_BIOS_OE
                     jmp           PS1_CONSOLE_ALL_JMPNTSC_SYNC3
 PS1_CONSOLE_ALL_JMPNTSC_SYNC3_L1          snb           IO_BIOS_OE
                     jmp           PS1_CONSOLE_ALL_JMPNTSC_SYNC3_L1
-                    decsz         VAR_TOFFSET
+                    decsz         VAR_DC4
                     jmp           PS1_CONSOLE_ALL_JMPNTSC_SYNC3
                     mov           w,#$88
                     mov           IO_BIOS_DATA,w
@@ -1959,7 +1965,7 @@ BIOS_PATCH_DEV1 ;  straight patch flow 0 - 115
 DEV1_MODE_LOAD_START          clrb          PSX_FLAG			; PSX_FLAG clrb here related finish mode run ?
                     setb          SOFT_RST
                     setb          EJ_FLAG						; skip logo patch after media for DEVMODE
-                    setb          DEV1_Flag						;set DEVMODE flags
+                    setb          DEV1_FLAG						;set DEVMODE flags
                     mov           w,#$73
                     mov           VAR_DC1,w				; VAR_DC1 = 73h = 115
                     clr           w
@@ -2029,7 +2035,7 @@ CDDVD_PATCH_DATA
 START_CDDVD_PATCH          clr           fsr
                     setb          IO_CDDVD_OE_A_1R
 ;execute first patch for V12 only ...					
-                    snb           V14_Flag
+                    snb           V14_FLAG
                     jmp           V9toV14_CONSOLE_CDDVD_START
                     mov           w,#$30			
                     mov           w,VAR_BIOS_REV-w
@@ -2207,7 +2213,7 @@ ALL_CDDVD_PATCH1_GET_SYNC_BIT_L6          snb           IO_CDDVD_OE_A_1Q
 					
 	IFDEF	RSTBUMP
                     sb            IO_CDDVD_BUS_h
-                    setb          JAP_Flag
+                    setb          JAP_FLAG
 	ENDIF
                     snb           PSX_FLAG
                     page          $0200
@@ -2228,9 +2234,9 @@ CDDVD_REGION          snb           IO_CDDVD_OE_A_1Q
                     mov           !IO_CDDVD_BUS,w
                     setb          IO_CDDVD_OE_A_1R
 ;prepare patch region , here for speed !!! No move!!!						
-                    snb           JAP_Flag
+                    snb           JAP_FLAG
                     jmp           CDDVD_JAP
-                    snb           UK_Flag
+                    snb           UK_FLAG
                     jmp           CDDVD_PAL
 ;:reg_usa					
                     clr           w
