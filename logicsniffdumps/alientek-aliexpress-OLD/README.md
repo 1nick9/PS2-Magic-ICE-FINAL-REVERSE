@@ -1,3 +1,6 @@
+OLD LOGIC DUMP FOUND NOT GOOD FOR USE.
+
+
 v5/6 sniffed patches for bios alone.
 
 24 10 3C E4 24 80 AC E4 22 90 AC 84 BC 91 34 00 00 30 AE 0C 00 00 00 bios
