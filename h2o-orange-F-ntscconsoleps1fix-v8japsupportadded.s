@@ -262,12 +262,12 @@ SCEx_DATA
                     retw          $45	; E
                     retw          $41	; A
 					
-                    retw          $53	; S	; UK	4
+                    retw          $53	; S	; JAP	4
                     retw          $43	; C
                     retw          $45	; E
                     retw          $49	; I
 					
-                    retw          $53	; S ; JAP	8
+                    retw          $53	; S	; UK	8
                     retw          $43	; C
                     retw          $45	; E
                     retw          $45	; E
