@@ -2180,7 +2180,7 @@ CDDVD_PATCH_DATA
 ;PACKIT_BYTE
                     jmp           pc+w					; when called VAR_DC2 is in w so determins start point
                                      					; 1 is sent first rb.4-rb.7 then follows to nibble and send 2 to rb.4-rb.7 then flow for 8 bytes
-                                     					;  1    2   ; G not patched on ps2 v1-v8 due to not connected. but is same overall patch for v1-v12 ea region.
+                                     					;  2    1   ; G not patched on ps2 v1-v8 due to not connected. but is same overall patch for v1-v12 ea region.
                                      					; IHGB IHGB	; Remember b/f swapped final from v9kit sch, H=RW pal support f=tr or but how F=F rstbmp? USA H same as pal?
                     retw          $3b					; 0011 1011 ; 0 ; USA start
                     retw          $a0					; 1010 0000 ; 1
