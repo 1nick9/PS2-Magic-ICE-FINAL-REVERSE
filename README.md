@@ -17,7 +17,7 @@ only needed for these versions of mechacon. only CXP103049-003GG tested but assu
 
 3.08_4    (0x080304) | CXP103049-403GG | G-chassis SCPH-39005/6/7 (Asia), late units
 
-this is the last rev of spu which only found in late model jap console and requires the patch level of dragon in protection. wire with abghi vs prior v7 and lower jap abhi only. the label on the mechacon displays this and motherboard rev was gm-022 for me to discover this issue. short same jumper as v14usa support for restbump which is f to flipflop r (pin 2) or pin 8 and 9 on sx28.
+this is the last rev of spc mechacon which only found in late model jap console and requires the patch level of dragon in protection. wire with abghi vs prior v7 and lower jap abhi only. the label on the mechacon displays this and motherboard rev was gm-022 for me to discover this issue. short same jumper as v14usa support for restbump which is f to flipflop r (pin 2) or pin 8 and 9 on sx28.
 mods that dont work with this are infinity based. so this is a nice improvement to add support for a low supported hardware modchip wise :)
 
 Sources:
