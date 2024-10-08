@@ -16,6 +16,7 @@ Current features implemented:
 - Macrovision off and green fix
 - v8 Asian console support which no mods currently available do (dms does but poorly)
 - v1-90k (though 75k+ decka models is poor preformance at this point, better in pal fat consoles)
+- Disable mode
 
   at its core is simple functions but all need and want out of a chip. dvd9 backups require to be prepatched with toxic patcher (found in tools for pc)
 
