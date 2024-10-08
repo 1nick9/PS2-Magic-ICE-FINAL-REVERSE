@@ -14,6 +14,8 @@ Current features implemented:
 - Pal ps2 consoles has ps1 import fix which is superior to infinity/dms (modbo/mars) method working with all games (infinity/dms method some games y screen fix doesnt work). ps1 logo is shown too than modbo.
 - Dev1
 - Macrovision off and green fix
+- v8 Asian console support which no mods currently available do (dms does but poorly)
+- v1-90k (though 75k+ decka models is poor preformance at this point, better in pal fat consoles)
 
   at its core is simple functions but all need and want out of a chip. dvd9 backups require to be prepatched with toxic patcher (found in tools for pc)
 
