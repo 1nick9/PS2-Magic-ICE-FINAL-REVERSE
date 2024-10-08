@@ -7,6 +7,16 @@ This is a first coding project for me so please bare with the learning process o
 
 SRC is SX ASM formart. for use directly with SX-Key Editor (official SDK for SX)
 
+Current features implemented:
+
+- PS1/2 auto boot
+- PS1/2 region free and backups
+- Pal ps2 consoles has ps1 import fix which is superior to infinity/dms (modbo/mars) method working with all games (infinity/dms method some games y screen fix doesnt work). ps1 logo is shown too than modbo.
+- Dev1
+- Macrovision off and green fix
+
+  at its core is simple functions but all need and want out of a chip. dvd9 backups require to be prepatched with toxic patcher (found in tools for pc)
+
 some noted differences between ice final and h2o is the ps1 support on ntsc consoles. ice will display ntsc games correctly but no yfix or colour fix for ntsc. h2o all besides 75k fall to pal import fix which make logo and ntsc/pal display incorrectly on ntsc consoles, works properly ntsc/pal on pal consoles (odd boot yfix doesnt take, put in standby and wait 10sec then force ps1 mode and usually takes).
 first edit of h2o is to make flow as ice final does pal/ntsc consoles as same patches just missing jump to skip the pal console only patches for ntsc consoles, tested on jap console only so far n operates as ice final now, pal should do as intended as simple snb edit.
 
