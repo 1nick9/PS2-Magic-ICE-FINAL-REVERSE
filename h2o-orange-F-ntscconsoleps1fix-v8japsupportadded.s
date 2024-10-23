@@ -280,16 +280,16 @@ SEND_SCEX
                     snb           UK_FLAG
                     jmp           uk
                     clr           VAR_DC4
-                    jmp           usa
+                    jmp           SCEx_IO_SET
 uk
                     mov           w,#8;$8
                     mov           VAR_DC4,w
-                    jmp           usa
+                    jmp           SCEx_IO_SET
 jap
                     mov           w,#4;$4
                     mov           VAR_DC4,w
-                    jmp           usa
-usa
+                    jmp           SCEx_IO_SET
+SCEx_IO_SET
                     mov           w,#4;$4
                     mov           VAR_PSX_BC_CDDVD_TEMP,w
                     mov           w,#$b
