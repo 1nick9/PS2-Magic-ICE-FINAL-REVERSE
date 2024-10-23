@@ -284,15 +284,15 @@ SEND_SCEX
                     jmp           jap
 usa
                     clr           VAR_DC4
-                    jmp           Label_0063
+                    jmp           SCEx_IO_SET
 uk
                     mov           w,#$8
                     mov           VAR_DC4,w
-                    jmp           Label_0063
+                    jmp           SCEx_IO_SET
 jap
                     mov           w,#$4
                     mov           VAR_DC4,w
-Label_0063							;;todo
+SCEx_IO_SET
                     mov           w,#$1f
                     mov           m,w
                     mov           w,#$b
