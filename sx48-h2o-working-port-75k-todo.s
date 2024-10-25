@@ -1,11 +1,11 @@
 ;********************************************************************************
-;                  final-48.sxh				hash 3DFE3A9BB1B2A7C4503EC2A7316EF07D
+;                  final-48.sxh				hash 332FC3EFC0BB69F1CD0AB74E76AB210E
 ;********************************************************************************
                    device        SX48,TURBO,BOROFF,OSCHS2,OPTIONX,WDRT006
                     ID                    'ICEREV'
 					;; double ; for needs attension for mistakes or areas to change to function alike h2o or just general check here marker
 ;DEFINE
-;RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. else is compiled as f=tr			72E088CB759858AEF7CD8C29F4540DB5
+RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. else is compiled as f=tr			AD8D815BD099E0709BF588415E24D804
 
 ;;now implemented, but checksums below not updated from sx28. none tested. ;only f=tr tested on v3pal
 
@@ -17,6 +17,12 @@
 ;NTSCPS1YFIX75K		= 	1			;uncomment for 75k NTSC IMPORT YFIX PAL CONSOLE TESTED makes pal off screen but ntsc correct. off pal correct, ntsc crushed.
 ;NTSCPS1YFIX75K ON rstbump 891246cec7e63bc112c4005b700a7a22 f=tr 75k pal ec962491125e6e2196e215b6cb5222a1
 ;only rstbump v8jap tested but rest should be right
+
+
+;fsr convert
+; 15h-1f sx28 addresses + b due to sx48 20h start
+; 30h+ addresses - 5 due to 15h-20h=b b-10h=5 due to or 10h for map :)
+;;todo indf if needs. yet to test in 75k
 
 ;io pin assignments
 IO_SCEX				=		ra.2 ; (PSX:SCEx)RA2(S)
@@ -1105,7 +1111,7 @@ ALL_CONTIUNE_BIOS_PATCH
                     snb           DEV1_FLAG
                     jmp           SECONDBIOS_PATCH_DEV1_STACK
                     mov           VAR_DC3,w
-                    mov           w,#$20
+                    mov           w,#$20;15
                     mov           fsr,w
 ;:loop					
 LOAD_BIOS_PATCH_DATA
@@ -1159,7 +1165,7 @@ SECOND_BIOS_PATCH_SYNC_LOOP6
                     mov           w,IO_BIOS_DATA-w
                     sb            z
                     jmp           SECOND_BIOS_PATCH_SYNC
-                    mov           w,#$20
+                    mov           w,#$20;15
                     mov           fsr,w
 					
 ;-----------------------------------------------------------
@@ -1211,7 +1217,7 @@ SECOND_BIOS_PATCH_SYNC_P4_L3
 
 ;SETUPDEV				
 SECONDBIOS_PATCH_DEV1_STACK
-                    mov           w,#$27
+                    mov           w,#$27;1c
                     mov           fsr,w
                     mov           w,VAR_DC3
                     mov           indf,w
@@ -1226,26 +1232,26 @@ SECONDBIOS_PATCH_DEV1_STACK
                     page          $0200
                     jmp           SECOND_BIOS_PATCH_SYNC
 
-SET_V14DRV		;; fsr indf will need work
-                    mov           w,#$34
+SET_V14DRV		;; indf will need work
+                    mov           w,#$2f;34
                     mov           fsr,w
                     mov           w,#$14
                     mov           indf,w
                     inc           fsr
                     mov           w,#$2
                     mov           indf,w
-                    mov           w,#$50
+                    mov           w,#$4b;50
                     mov           fsr,w
                     mov           w,#$20
                     mov           indf,w
-                    mov           w,#$54
+                    mov           w,#$4f;54
                     mov           fsr,w
                     mov           w,#$5c
                     mov           indf,w
                     inc           fsr
                     mov           w,#$25
                     mov           indf,w
-                    mov           w,#$5a
+                    mov           w,#$55;5a
                     mov           fsr,w
                     mov           w,#$8
                     mov           indf,w
@@ -1253,7 +1259,7 @@ SET_V14DRV		;; fsr indf will need work
                     mov           VAR_DC1,w
                     mov           w,#100;$64
                     mov           VAR_DC3,w
-                    mov           w,#$5c
+                    mov           w,#$57;5c
                     mov           fsr,w
                     page          $0200						; PAGE2
                     jmp           LOAD_BIOS_PATCH_DATA					
@@ -1366,7 +1372,7 @@ POST_PATCH4MODE_START_P2_L1
                     snb           X_FLAG
                     jmp           POST_PATCH4MODE_END_P2
 ;xcdvdman1_next					
-                    mov           w,#$20
+                    mov           w,#$20;15
                     mov           fsr,w
 ;xcdvdman1_l1					
 POST_PATCH4MODE_START_P2_L2
@@ -1924,7 +1930,7 @@ DEV1_MODE_LOAD_START
                     mov           VAR_DC1,w
                     clr           w
                     mov           VAR_DC3,w
-                    mov           w,#$20
+                    mov           w,#$20;15
                     mov           fsr,w
 DEV1_MODE_LOAD_LOOP
                     mov           w,VAR_DC3
@@ -2041,7 +2047,7 @@ PS1_CONSOLE_PAL_YFIX
 ;V7DRV
                     mov           w,#$3c
                     mov           IO_BIOS_DATA,w
-                    mov           w,#$20
+                    mov           w,#$20;15
                     mov           fsr,w
                     mov           w,#$b
                     mov           VAR_DC2,w
@@ -2464,7 +2470,7 @@ START_PS2LOGO_PATCH_LOAD
 PS2LOGO_PATCHLOAD_22_JMP2
                     clr           w
                     mov           VAR_DC3,w
-                    mov           w,#$20;$15
+                    mov           w,#$20;15
                     mov           fsr,w					
 					
 ;PS2_PS2LOGO:loop
@@ -2600,13 +2606,13 @@ PS1_MODE_L4	;;	h2o differs. ported
                     mov           w,IO_BIOS_DATA-w
                     sb            z
                     jmp           PS1_MODE_START
-                    mov           w,#$1b		;; check for 75k
+                    mov           w,#$26;1b
                     mov           fsr,w
                     snb           V14_FLAG
                     jmp           PS1_MODE_L5					
                     snb           V12_FLAG
                     jmp           PS1_MODE_v12_PATCHS
-                    mov           w,#$37;3c		;;
+                    mov           w,#$37;3c
                     mov           fsr,w
 PS1_MODE_L5
                     snb           IO_BIOS_OE
