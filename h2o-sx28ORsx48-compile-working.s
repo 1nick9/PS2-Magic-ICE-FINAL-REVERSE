@@ -9,7 +9,7 @@ SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR	
 
 RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
 ;USE ONLY FOR SX COMPILING FOR ;;todo sx48rstbump v8/usav14 jmper and japv14 mechacon check
-SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
+SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	D146DFD2DFC6F641029CA7A2A1529DD3
 ;RSTBUMPSX28			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
 
 ;USE ONLY IF F=TR commented out RSTBUMP
@@ -165,6 +165,12 @@ STARTUP
                     mov           m,w
                     mov           w,#$f7
                     mov           !IO_CDDVD_BUS,w
+	IFDEF	SX48RSTBUMP					
+                    mov           w,#$1e			;; extra needed for io v14jmp
+                    mov           m,w
+                    mov           w,#$be
+                    mov           !IO_CDDVD_BUS,w	;; end extra io v14jmp	
+	ENDIF					
                     mov           w,#$1f
                     mov           m,w
                     mov           w,#$7
@@ -510,9 +516,14 @@ BIOS_GET_SYNC
 	; wait for "S201" seems to wait for "PS20" since 0.94
 	;       0123456789ABC
 	; Read "PS201?0?C200?xxxx.bin"
+	IFDEF	SX48RSTBUMP
+                    call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low	
+                    nop
+	ELSE
                     snb           IO_BIOS_OE					; next byte / wait for bios OE low
                     jmp           BIOS_GET_SYNC
                     nop           
+	ENDIF
                     mov           w,#$50					; ASCII P	; is byte0 = 'P' seems to be new count prior for "PS201?0?C200?xxxx.bin"
                     mov           w,IO_BIOS_DATA-w
                     sb            z
@@ -540,9 +551,13 @@ CAPTURE_BIOS_REV
                     mov           w,IO_BIOS_DATA
                     mov           VAR_BIOS_REV,w				; capture byte5 as VAR_BIOS_REV ; v1.x0 of bios rev
 CAPTURE_BIOS_REGION
+	IFDEF	SX48RSTBUMP
+                    call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low	
+	ELSE
                     snb           IO_BIOS_OE					; next byte / wait for bios OE low
                     jmp           CAPTURE_BIOS_REGION
                     nop           ;; extra sx28
+	ENDIF
                     mov           w,#$30					; ASCII 0; is byte6 0 as fixed value check
                     mov           w,IO_BIOS_DATA-w
                     sb            z
@@ -551,9 +566,13 @@ CAPTURE_BIOS_REGION
                     mov           w,IO_BIOS_DATA
                     mov           VAR_BIOS_REGION_TEMP,w			;store byte7 in VAR_BIOS_REGION_TEMP
 CHECK_BYTE_AB_REGION_CAPTURE_YR
+	IFDEF	SX48RSTBUMP
+                    call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low	
+	ELSE
                     snb           IO_BIOS_OE					; next byte / wait for bios OE low
                     jmp           CHECK_BYTE_AB_REGION_CAPTURE_YR
                     nop		;; extra sx28
+	ENDIF						
                     mov           w,#$30					; ASCII 0 is byteA
                     mov           w,IO_BIOS_DATA-w
                     sb            z
@@ -598,7 +617,11 @@ BIOS_V14
                     sb            IO_CDDVD_BUS_f
                     jmp           BIOS_USA
 	ENDIF
-	
+	IFDEF	SX48RSTBUMP
+                    clrb          IO_CDDVD_OE_A_1R			;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
+                    sb            IO_CDDVD_BUS_f
+                    jmp           BIOS_USA
+	ENDIF	
 	IFDEF	USAv14
 	jmp           BIOS_USA
 	ENDIF
@@ -888,7 +911,12 @@ CONSOLE_2002_JMP
                     clrb          IO_CDDVD_OE_A_1R
                     sb            IO_CDDVD_BUS_f
                     setb          JAP_V8
-	ENDIF						
+	ENDIF			
+	IFDEF	SX48RSTBUMP
+                    clrb          IO_CDDVD_OE_A_1R		;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
+                    sb            IO_CDDVD_BUS_f
+                    setb          JAP_V8
+	ENDIF			
 	IFDEF	JAPv14orv8
                     setb          JAP_V8
 	ENDIF						
@@ -2742,6 +2770,10 @@ ALL_CDDVD_PATCH1_GET_SYNC_BIT_L6
                     sb            IO_CDDVD_BUS_h
                     setb          JAP_FLAG
 	ENDIF
+	IFDEF	SX48RSTBUMP		;; check triggers if not held on 5v h. ;; check io setup. likely use spare io for jmper OR JUST JMP 5V TO H NON JAP.... ;; page space is issue, trim so works.
+                    sb            IO_CDDVD_BUS_h
+                    setb          JAP_FLAG
+	ENDIF	
                     snb           PSX_FLAG
                     page          $0200
                     jmp           PS2_MODE_RB_IO_SET_SLEEP			;V1-V8: sleep for DVD media loaded in PSX mode
