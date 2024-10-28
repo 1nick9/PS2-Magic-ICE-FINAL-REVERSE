@@ -3,16 +3,21 @@
 ;********************************************************************************
 					
 ;DEFINE
+
 ;SX48RAM			= 	1			; unneeded memory remap, has issues with 75k ps1drv, likely some wrong cals
-;SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28	A7B089F1BEFF0EE9EE002CB378A1D018
-;SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	2729F6787505F7107890D6FC89FD0A4E
-;SX28RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx28 with RSTBUMP uncommented	3158B96DD151BDD71406C4C05B80915E
-;RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
+SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR	A7B089F1BEFF0EE9EE002CB378A1D018
+
+RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
+;USE ONLY FOR SX COMPILING FOR ;;todo sx48rstbump v8/usav14 jmper and japv14 mechacon check
+SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
+;RSTBUMPSX28			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
+
 ;USE ONLY IF F=TR commented out RSTBUMP
 ;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal d8d6a5acf3e30901b45b75b001ff457c
 ;USAv14			= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa 809aa1533abed9cbdf2ed612a6fc5627
 ;JAPv14orv8			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap 7a35a0a6001a04ed71509a1c18b6544f
 ;also for v7 to use v9+ mechacon patch for v8 jap support f=tr 
+
 ;NTSCPS1YFIX75K		= 	1			;uncomment for 75k NTSC IMPORT YFIX PAL CONSOLE TESTED makes pal off screen but ntsc correct. off pal correct, ntsc crushed.
 ;NTSCPS1YFIX75K ON rstbump 891246cec7e63bc112c4005b700a7a22 f=tr 75k pal ec962491125e6e2196e215b6cb5222a1
 ;only rstbump v8jap tested but rest should be right
@@ -588,7 +593,7 @@ BIOS_USA
 BIOS_V14
                     setb          V14_FLAG
 	
-	IFDEF	RSTBUMP
+	IFDEF	RSTBUMPSX28
                     clrb          IO_CDDVD_OE_A_1R
                     sb            IO_CDDVD_BUS_f
                     jmp           BIOS_USA
@@ -879,7 +884,7 @@ RESUME_MODE_FROM_EJECT_L3
 ;MEPATCH					
 CONSOLE_2002_JMP
                     page          $0600
-	IFDEF	RSTBUMP
+	IFDEF	RSTBUMPSX28
                     clrb          IO_CDDVD_OE_A_1R
                     sb            IO_CDDVD_BUS_f
                     setb          JAP_V8
@@ -2004,7 +2009,11 @@ AUTO_REBOOT_PS1MODE
                     jmp           PS1_DETECTED_REBOOT_L2
                     decsz         VAR_PSX_BYTE
                     jmp           PS1_DETECTED_REBOOT_L1
-	IFDEF	SX48RSTBUMP
+												
+;AUTORESET 	
+;NEW!!! future board design using a 2N7002 mosfet					
+	IFDEF	RSTBUMP
+		IFDEF	SX48RSTBUMP
 ;NEW!!! future board design using a 2N7002 mosfet		
        				mov           w,#$1b
                     mov           m,w					
@@ -2015,10 +2024,7 @@ AUTO_REBOOT_PS1MODE
                     mov           w,#$0
                     mov           IO_CDDVD_BUS,w
                     mov           w,#$fb
-	ENDIF													
-;AUTORESET 	
-;NEW!!! future board design using a 2N7002 mosfet					
-	IFDEF	SX28RSTBUMP
+		ELSE	
                    mode          $000B						;disable interrupt , need !!! ...
                    mov           w,#$ff						; 1111 1111
                    mov           !IO_CDDVD_BUS,w				; above set for IO_CDDVD_BUS
@@ -2026,6 +2032,7 @@ AUTO_REBOOT_PS1MODE
                    mov           w,#$0						; 0000 0000
                    mov           IO_CDDVD_BUS,w					; IO_CDDVD_BUS = 0 ? clear IO_CDDVD_BUS values
                    mov           w,#$fb						; 1111 1011 IO_REST IO_REST output
+		ENDIF		
 	ELSE			
                     mov           w,#$0
                     mov           IO_CDDVD_BUS,w
@@ -2731,7 +2738,7 @@ ALL_CDDVD_PATCH1_GET_SYNC_BIT_L6
                     snb           IO_CDDVD_BUS_b
                     jmp           V9toV12_CONSOLE_PATCH1_POST
 					
-	IFDEF	RSTBUMP
+	IFDEF	RSTBUMPSX28
                     sb            IO_CDDVD_BUS_h
                     setb          JAP_FLAG
 	ENDIF
@@ -2918,4 +2925,20 @@ FINISHED_RUN_END
                     call          DELAY100m
                     page          $0200
                     jmp           PS2_MODE_RB_IO_SET_SLEEP
+					
+	IFDEF	SX48
+		
+
+                    org           $0800
+					
+                    org           $0A00
+
+                    org           $0C00
+					
+                    org           $0E00					
+
+
                     end
+	ELSE
+                    end
+	ENDIF					
