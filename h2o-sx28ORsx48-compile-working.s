@@ -4,16 +4,22 @@
 					
 ;DEFINE
 
+;expermenting defines, not needed.
 ;SX48RAM			= 	1			; unneeded memory remap, has issues with 75k ps1drv, likely some wrong cals
+
+;SX Chip used. SX48 uncomment below. SX28 have commented.
 SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR	A7B089F1BEFF0EE9EE002CB378A1D018
 
-RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
-;USE ONLY FOR SX COMPILING FOR ;;todo sx48rstbump v8/usav14 jmper and japv14 mechacon check
-SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	D146DFD2DFC6F641029CA7A2A1529DD3
-;RSTBUMPSX28			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 also for which compling to use
+RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48 E51E9226F0360FBAA2510BDFDA0BC433
+;USE SX48RSTBUMP ONLY FOR SX COMPILING FOR SX48. Both RSTBUMP and SX48RSTBUMP must be on
+SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
 
-;USE ONLY IF F=TR commented out RSTBUMP
-;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal d8d6a5acf3e30901b45b75b001ff457c
+;V14/V8jap identiy jmpers. if using sx48 needs the trim, sx28 either can go but stock code is without trim
+H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  3158B96DD151BDD71406C4C05B80915E
+SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. D146DFD2DFC6F641029CA7A2A1529DD3
+
+;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS. checksums below now updated
+;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal 0F465F30D6207AF98456841781DEC442
 ;USAv14			= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa 809aa1533abed9cbdf2ed612a6fc5627
 ;JAPv14orv8			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap 7a35a0a6001a04ed71509a1c18b6544f
 ;also for v7 to use v9+ mechacon patch for v8 jap support f=tr 
@@ -118,6 +124,8 @@ DEV1_FLAG = VAR_SWITCH.4
 V14_FLAG = VAR_SWITCH.5
 ;set due to W for region of BIOS which decka models
 
+V0_FLAG = VAR_SWITCH.6
+;V0 10-18K console flag
 
 ;------------------------------------------------------------
 ;CODE
@@ -165,7 +173,7 @@ STARTUP
                     mov           m,w
                     mov           w,#$f7
                     mov           !IO_CDDVD_BUS,w
-	IFDEF	SX48RSTBUMP					
+	IFDEF	H2O75KJMPERS					
                     mov           w,#$1e			;; extra needed for io v14jmp
                     mov           m,w
                     mov           w,#$be
@@ -223,9 +231,11 @@ STARTUP          								;here from stby & wake up...
                     mode          $000D						;TTL/CMOS mode...
                     mov           w,#$f7					;1111 0111
                     mov           !IO_CDDVD_BUS,w				;set IO_EJECT input as cmos ( level '1' > 2.5V ) work better with noise ...
-                    mode          $000E						;?
+	IFDEF	H2O75KJMPERS
+                    mode          $000E						;?		;; h and f io jmpers needed/extra 75k/v8jap 
                     mov           w,#$be					; 1011 1110
-                    mov           !IO_CDDVD_BUS,w
+                    mov           !IO_CDDVD_BUS,w					;; end
+	ENDIF
                     mode          $000F						;port mode
                     mov           w,#$7						; 0000 0111
                     mov           !ra,w						;port mode : all input
@@ -391,7 +401,7 @@ SEND_SCEX
 ;--------------------------------------------------------------------------------
 	IFDEF	SX48
                     snb           USA_FLAG
-                    jmp           usa
+                    jmp           usa				;; idea for space usa flow trigger
                     snb           UK_FLAG
                     jmp           uk
                     jmp           jap
@@ -516,7 +526,7 @@ BIOS_GET_SYNC
 	; wait for "S201" seems to wait for "PS20" since 0.94
 	;       0123456789ABC
 	; Read "PS201?0?C200?xxxx.bin"
-	IFDEF	SX48RSTBUMP
+	IFDEF	SX48H2O75KJMPERSTRIM
                     call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low	
                     nop
 	ELSE
@@ -541,7 +551,7 @@ BIOS_GET_SYNC
                     call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low
                     mov           w,#$30					; ASCII 0	; is byte3 (byte2 0.94) = '0'
                     mov           w,IO_BIOS_DATA-w
-                    sb            z
+                    sb            z							;; alt v0 ident if C
                     jmp           BIOS_GET_SYNC
                     call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low
 CAPTURE_BIOS_REV
@@ -551,7 +561,7 @@ CAPTURE_BIOS_REV
                     mov           w,IO_BIOS_DATA
                     mov           VAR_BIOS_REV,w				; capture byte5 as VAR_BIOS_REV ; v1.x0 of bios rev
 CAPTURE_BIOS_REGION
-	IFDEF	SX48RSTBUMP
+	IFDEF	SX48H2O75KJMPERSTRIM
                     call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low	
 	ELSE
                     snb           IO_BIOS_OE					; next byte / wait for bios OE low
@@ -566,7 +576,7 @@ CAPTURE_BIOS_REGION
                     mov           w,IO_BIOS_DATA
                     mov           VAR_BIOS_REGION_TEMP,w			;store byte7 in VAR_BIOS_REGION_TEMP
 CHECK_BYTE_AB_REGION_CAPTURE_YR
-	IFDEF	SX48RSTBUMP
+	IFDEF	SX48H2O75KJMPERSTRIM
                     call          BIOS_WAIT_OE_LO_P1          			; next byte / wait for bios OE low	
 	ELSE
                     snb           IO_BIOS_OE					; next byte / wait for bios OE low
@@ -612,16 +622,16 @@ BIOS_USA
 BIOS_V14
                     setb          V14_FLAG
 	
-	IFDEF	RSTBUMPSX28
+	IFDEF	H2O75KJMPERS
                     clrb          IO_CDDVD_OE_A_1R
                     sb            IO_CDDVD_BUS_f
                     jmp           BIOS_USA
 	ENDIF
-	IFDEF	SX48RSTBUMP
-                    clrb          IO_CDDVD_OE_A_1R			;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
-                    sb            IO_CDDVD_BUS_f
-                    jmp           BIOS_USA
-	ENDIF	
+;	IFDEF	SX48RSTBUMP
+ ;                   clrb          IO_CDDVD_OE_A_1R			;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
+  ;                  sb            IO_CDDVD_BUS_f
+   ;                 jmp           BIOS_USA
+	;ENDIF	
 	IFDEF	USAv14
 	jmp           BIOS_USA
 	ENDIF
@@ -907,16 +917,16 @@ RESUME_MODE_FROM_EJECT_L3
 ;MEPATCH					
 CONSOLE_2002_JMP
                     page          $0600
-	IFDEF	RSTBUMPSX28
+	IFDEF	H2O75KJMPERS
                     clrb          IO_CDDVD_OE_A_1R
                     sb            IO_CDDVD_BUS_f
                     setb          JAP_V8
 	ENDIF			
-	IFDEF	SX48RSTBUMP
-                    clrb          IO_CDDVD_OE_A_1R		;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
-                    sb            IO_CDDVD_BUS_f
-                    setb          JAP_V8
-	ENDIF			
+;	IFDEF	SX48RSTBUMP
+ ;                   clrb          IO_CDDVD_OE_A_1R		;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
+  ;                  sb            IO_CDDVD_BUS_f
+   ;                 setb          JAP_V8
+	;ENDIF			
 	IFDEF	JAPv14orv8
                     setb          JAP_V8
 	ENDIF						
@@ -2766,14 +2776,14 @@ ALL_CDDVD_PATCH1_GET_SYNC_BIT_L6
                     snb           IO_CDDVD_BUS_b
                     jmp           V9toV12_CONSOLE_PATCH1_POST
 					
-	IFDEF	RSTBUMPSX28
+	IFDEF	H2O75KJMPERS
                     sb            IO_CDDVD_BUS_h
                     setb          JAP_FLAG
 	ENDIF
-	IFDEF	SX48RSTBUMP		;; check triggers if not held on 5v h. ;; check io setup. likely use spare io for jmper OR JUST JMP 5V TO H NON JAP.... ;; page space is issue, trim so works.
-                    sb            IO_CDDVD_BUS_h
-                    setb          JAP_FLAG
-	ENDIF	
+;	IFDEF	SX48RSTBUMP		;; check triggers if not held on 5v h. ;; check io setup. likely use spare io for jmper OR JUST JMP 5V TO H NON JAP.... ;; page space is issue, trim so works.
+ ;                   sb            IO_CDDVD_BUS_h
+  ;                  setb          JAP_FLAG
+	;ENDIF	
                     snb           PSX_FLAG
                     page          $0200
                     jmp           PS2_MODE_RB_IO_SET_SLEEP			;V1-V8: sleep for DVD media loaded in PSX mode
@@ -2799,7 +2809,7 @@ CDDVD_REGION
                     jmp           CDDVD_JAP
                     snb           UK_FLAG
                     jmp           CDDVD_PAL
-;:reg_usa					
+;:reg_usa					;; idea for trim, usa flag not needed set here, will for ps1drv scex??
                     clr           w
                     jmp           ALL_CDDVD_PATCH_SET_VAR_DC3
 ;:reg_uk					
