@@ -15,7 +15,7 @@ s/asm to be used with SX-Key Editor (official SDK for SX). Requires renaming ext
 
 Current features implemented:
 
-- PS1/2 auto boot
+- PS1/2/DVD auto boot
 - PS1/2 region free and backups
 - Pal ps2 consoles has ps1 import fix which is superior to infinity/dms (modbo/mars) method working with all games (infinity/dms method some games y screen fix doesnt work). ps1 logo is shown too than modbo.
 - Dev1
