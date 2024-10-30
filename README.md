@@ -7,7 +7,7 @@ FINAL-REVERSE-define-restbump.s is the reverse i initially did and left behind f
 
 H2O code was only supplied in compiled form for sx28 and sources for redesign port for ax1001 (found in sources/h2o). Has now been resourced and ablity to cross compile with sx28/sx48 from one source via defines along with other define options reversed (ps1drv on fat ps2 isnt set as define as bug not feature alt so won't want it off).
 
-WIP dirs have the WIP of both h2o and sx48 port in different stages. sx48 was buggy cross compiled mess hence too me abit to work out how to complie for both as cleaned it up first. (turns out I'd forgot had fixed the regs and sx48 2x extra io as biggest issue, idiot of me lol)
+WIP dirs have the WIP of both h2o and sx48 port in different stages. sx48 was buggy cross compiled mess hence took me abit to work out how to complie for both as cleaned it up first. (turns out I'd forgot had fixed the regs and sx48 2x extra io as biggest issue, idiot of me lol)
 
 This is a first coding project for me so please bare with the learning process ontop of the reversing side.
 
