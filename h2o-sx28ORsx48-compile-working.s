@@ -8,7 +8,7 @@
 ;SX48RAM			= 	1			; unneeded memory remap, has issues with 75k ps1drv, likely some wrong cals
 
 ;SX Chip used. SX48 uncomment below. SX28 have commented.
-SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR	A7B089F1BEFF0EE9EE002CB378A1D018
+SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
 
 RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48 E51E9226F0360FBAA2510BDFDA0BC433
 ;USE SX48RSTBUMP ONLY FOR SX COMPILING FOR SX48. Both RSTBUMP and SX48RSTBUMP must be on
@@ -18,14 +18,14 @@ SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx
 H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  3158B96DD151BDD71406C4C05B80915E
 SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. D146DFD2DFC6F641029CA7A2A1529DD3
 
-;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS. checksums below not updated
-;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal 0F465F30D6207AF98456841781DEC442
-;USAv14			= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa 809aa1533abed9cbdf2ed612a6fc5627
-;JAPv14orv8			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap 7a35a0a6001a04ed71509a1c18b6544f
+;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS.
+;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal sx28 0F465F30D6207AF98456841781DEC442 sx48 A7B089F1BEFF0EE9EE002CB378A1D018
+;USAv14			= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa sx28 0F7BAA63B5735E9A0D7C40BAF4E57A7B sx48 CD93EF4293DA0171269FE8C42E7E6D1E
+;JAPv14orv8			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap sx28 17F5B31F88A8CF440BF83BB7B52587F4 sx48 8A998B76CC47D7A65D7C61A4F2901570
 ;also for v7 to use v9+ mechacon patch for v8 jap support f=tr 
 
 ;NTSCPS1YFIX75K		= 	1			;uncomment for 75k NTSC IMPORT YFIX PAL CONSOLE TESTED makes pal off screen but ntsc correct. off pal correct, ntsc crushed.
-;NTSCPS1YFIX75K ON rstbump 891246cec7e63bc112c4005b700a7a22 f=tr 75k pal ec962491125e6e2196e215b6cb5222a1
+;NTSCPS1YFIX75K ON rstbump 891246cec7e63bc112c4005b700a7a22 f=tr 75k pal ec962491125e6e2196e215b6cb5222a1 ;;  checksums 75kps1yfix not updated
 ;only rstbump v8jap tested but rest should be right
 	IFDEF	SX48
                    device        SX48,TURBO,BOROFF,OSCHS2,OPTIONX,WDRT006
@@ -519,7 +519,7 @@ send_end
 ;--------------------------------------------------------------------------------
 BIOS_WAIT_OE_LO_P1
 ;--------------------------------------------------------------------------------
-NOTCALLED0          snb           IO_BIOS_OE
+                    snb           IO_BIOS_OE
                     jmp           BIOS_WAIT_OE_LO_P1
                     ret           
 BIOS_GET_SYNC          
@@ -982,7 +982,7 @@ PS1_V14_PATCH
 ;--------------------------------------------------------------------------------
 BIOS_WAIT_OE_LO_P2
 ;--------------------------------------------------------------------------------
-NOTCALLED3
+
                     snb           IO_BIOS_OE					; next byte / wait for bios OE low
                     jmp           BIOS_WAIT_OE_LO_P2        			; next byte / wait for bios OE low
                     ret           
@@ -1010,7 +1010,7 @@ END_BIOS_PATCHES_SRAM_RESET_IO
                     clr           fsr
                     retp 
 	ELSE		
-NOTCALLED1
+
                     mov           w,indf					; SRAM address moved to w and output to  IO_BIOS_DATA
                     mov           IO_BIOS_DATA,w
                     inc           fsr						; +1 to step through the SRAM cached patches
@@ -1314,7 +1314,7 @@ ALL_CONTIUNE_BIOS_PATCH
                     mov           w,#$20
 	ELSE						
                     mov           w,#$15
-ENDIF					
+	ENDIF					
                     mov           fsr,w
 ;:loop					
 LOAD_BIOS_PATCH_DATA
@@ -1527,7 +1527,7 @@ SET_V14DRV
                     mov           fsr,w
                     page          $0200						; PAGE2
                     jmp           LOAD_BIOS_PATCH_DATA
-ENDIF					
+	ENDIF					
 					
 ;----------------------------------------------------------
 ;XCDVDMAN routine
@@ -2340,7 +2340,7 @@ PS1_CONSOLE_ALL_JMPNTSC_SYNC3_L2
 ;--------------------------------------------------------------------------------
 BIOS_WAIT_OE_LO_P8
 ;--------------------------------------------------------------------------------
-NOTCALLED4
+
                     snb           IO_BIOS_OE          			; next byte / wait for bios OE low
                     jmp           BIOS_WAIT_OE_LO_P8
                     ret           
@@ -2491,7 +2491,7 @@ DEV1_MODE_LOAD_LOOP
 	ELSE
                     mov           w,#$10				; so that ends in top address of registery which is SRAM access. bottom 0-f reserved so when gets 1f goes 30h than 20h
                     or            fsr,w					; section 6.2.1 fig. 6-1 start at 15h then increase one 0001 0110 or 0001 0000 = 0001 1101 = 16h repeat
-ENDIF
+	ENDIF
                     inc           VAR_DC3				; + 1 VAR_DC3 starting 0 above
                     decsz         VAR_DC1				; jmp DEV1_MODE_LOAD_LOOP till VAR_DC1 = 0 start 119
                     jmp           DEV1_MODE_LOAD_LOOP
@@ -2501,7 +2501,7 @@ ENDIF
 ;--------------------------------------------------------------------------------
 MECHACON_WAIT_OE
 ;--------------------------------------------------------------------------------
-NOTCALLED2
+
 ;CDDVDSKIP_P8
                     snb           IO_CDDVD_OE_A_1Q 			; jmp MECHACON_WAIT_OE if ^Q = 1
                     jmp           MECHACON_WAIT_OE			; wait until flipflop ^Q == 0
@@ -2946,7 +2946,6 @@ FINISHED_RUN_END
                     org           $0E00					
 
 
-                    end
-	ELSE
-                    end
 	ENDIF					
+
+                    end
