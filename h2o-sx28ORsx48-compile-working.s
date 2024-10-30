@@ -627,11 +627,6 @@ BIOS_V14
                     sb            IO_CDDVD_BUS_f
                     jmp           BIOS_USA
 	ENDIF
-;	IFDEF	SX48RSTBUMP
- ;                   clrb          IO_CDDVD_OE_A_1R			;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
-  ;                  sb            IO_CDDVD_BUS_f
-   ;                 jmp           BIOS_USA
-	;ENDIF	
 	IFDEF	USAv14
 	jmp           BIOS_USA
 	ENDIF
@@ -921,12 +916,7 @@ CONSOLE_2002_JMP
                     clrb          IO_CDDVD_OE_A_1R
                     sb            IO_CDDVD_BUS_f
                     setb          JAP_V8
-	ENDIF			
-;	IFDEF	SX48RSTBUMP
- ;                   clrb          IO_CDDVD_OE_A_1R		;; check io setup. likely use spare io for jmper.... ;; page space is issue, trim so works.
-  ;                  sb            IO_CDDVD_BUS_f
-   ;                 setb          JAP_V8
-	;ENDIF			
+	ENDIF						
 	IFDEF	JAPv14orv8
                     setb          JAP_V8
 	ENDIF						
@@ -2780,10 +2770,6 @@ ALL_CDDVD_PATCH1_GET_SYNC_BIT_L6
                     sb            IO_CDDVD_BUS_h
                     setb          JAP_FLAG
 	ENDIF
-;	IFDEF	SX48RSTBUMP		;; check triggers if not held on 5v h. ;; check io setup. likely use spare io for jmper OR JUST JMP 5V TO H NON JAP.... ;; page space is issue, trim so works.
- ;                   sb            IO_CDDVD_BUS_h
-  ;                  setb          JAP_FLAG
-	;ENDIF	
                     snb           PSX_FLAG
                     page          $0200
                     jmp           PS2_MODE_RB_IO_SET_SLEEP			;V1-V8: sleep for DVD media loaded in PSX mode
