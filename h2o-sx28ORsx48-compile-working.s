@@ -2553,7 +2553,7 @@ START_CDDVD_PATCH
                     snb           V14_FLAG
                     jmp           V9toV14_CONSOLE_CDDVD_START
                     snb           JAP_V8        
-                    jmp           V9toV14_CONSOLE_CDDVD_START		;patch DVD media for V8 jap last mechacon spa rev						
+                    jmp           V9toV14_CONSOLE_CDDVD_START		;patch DVD media for V8 jap last mechacon spc rev						
                     mov           w,#$30			
                     mov           w,VAR_BIOS_REV-w
                     snb           z				
