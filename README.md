@@ -1,6 +1,8 @@
 # PS2-Magic-ICE-FINAL-REVERSE
 This is a project to reverse and resource the PS2 Magic ICE Final code.
 
+This is a first coding project for me so please bare with the learning process ontop of the reversing side.
+
 Have tidied up the repo. 
 
 FINAL-REVERSE-define-restbump.s is the reverse i initially did and left behind for moving onto h2o reverse as summ0ne supplied the source for it as FINAL.asm.
@@ -9,7 +11,6 @@ H2O code was only supplied in compiled form for sx28 and sources for redesign po
 
 WIP dirs have the WIP of both h2o and sx48 port in different stages. sx48 was buggy cross compiled mess hence took me abit to work out how to complie for both as cleaned it up first. (turns out I'd forgot had fixed the regs and sx48 2x extra io as biggest issue, idiot of me lol)
 
-This is a first coding project for me so please bare with the learning process ontop of the reversing side.
 
 s/asm to be used with SX-Key Editor (official SDK for SX). Requires renaming extension to .src for it to open then just set defines and complie as wish. if have sxkey flash directly in device option, if using fluffy2 go devices and save sxh and use with icprog. sx28 still set to compile with cp enabled. can disable for easier verifying with fluffy2 (will fail verifying with enabled and fluffy2 can sometimes write wrong unlike sxkey will give clear error if does)
 
