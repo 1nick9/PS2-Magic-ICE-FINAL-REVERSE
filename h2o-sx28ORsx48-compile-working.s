@@ -8,17 +8,17 @@
 ;SX48RAM			= 	1			; unneeded memory remap, has issues with 75k ps1drv, likely some wrong cals
 
 ;SX Chip used. SX48 uncomment below. SX28 have commented.
-SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR	A7B089F1BEFF0EE9EE002CB378A1D018
+;SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR	A7B089F1BEFF0EE9EE002CB378A1D018
 
 RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48 E51E9226F0360FBAA2510BDFDA0BC433
 ;USE SX48RSTBUMP ONLY FOR SX COMPILING FOR SX48. Both RSTBUMP and SX48RSTBUMP must be on
-SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
+;SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
 
 ;V14/V8jap identiy jmpers. if using sx48 needs the trim, sx28 either can go but stock code is without trim
 H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  3158B96DD151BDD71406C4C05B80915E
-SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. D146DFD2DFC6F641029CA7A2A1529DD3
+;SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. D146DFD2DFC6F641029CA7A2A1529DD3
 
-;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS. checksums below now updated
+;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS. checksums below not updated
 ;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal 0F465F30D6207AF98456841781DEC442
 ;USAv14			= 	1			;uncomment for fixed 75k being usa region. all prior still work any region		f=tr 75k usa 809aa1533abed9cbdf2ed612a6fc5627
 ;JAPv14orv8			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap 7a35a0a6001a04ed71509a1c18b6544f
