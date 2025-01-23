@@ -16,7 +16,7 @@ SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx
 
 ;V14/V8jap identiy jmpers. if using sx48 needs the trim, sx28 either can go but stock code is without trim
 H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  3158B96DD151BDD71406C4C05B80915E
-;SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. D146DFD2DFC6F641029CA7A2A1529DD3
+SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. D146DFD2DFC6F641029CA7A2A1529DD3
 
 ;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS.
 ;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal sx28 0F465F30D6207AF98456841781DEC442 sx48 A7B089F1BEFF0EE9EE002CB378A1D018
