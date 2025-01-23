@@ -8,11 +8,11 @@
 ;SX48RAM			= 	1			; unneeded memory remap, has issues with 75k ps1drv, likely some wrong cals
 
 ;SX Chip used. SX48 uncomment below. SX28 have commented.
-;SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
+SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
 
 RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48 E51E9226F0360FBAA2510BDFDA0BC433
 ;USE SX48RSTBUMP ONLY FOR SX COMPILING FOR SX48. Both RSTBUMP and SX48RSTBUMP must be on
-;SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
+SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4D74D099733ACDDCBB4F046B4258B20C
 
 ;V14/V8jap identiy jmpers. if using sx48 needs the trim, sx28 either can go but stock code is without trim
 H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  3158B96DD151BDD71406C4C05B80915E
