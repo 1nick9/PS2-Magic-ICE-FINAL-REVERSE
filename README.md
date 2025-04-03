@@ -12,7 +12,7 @@ H2O code was only supplied in compiled form for sx28 and sources for redesign po
 WIP dirs have the WIP of both h2o and sx48 port in different stages. sx48 was buggy cross compiled mess hence took me abit to work out how to complie for both as cleaned it up first. (turns out I'd forgot had fixed the regs and sx48 2x extra io as biggest issue, idiot of me lol)
 
 
-s/asm to be used with SX-Key Editor (official SDK for SX). Requires renaming extension to .src for it to open then just set defines and complie as wish. if have sxkey flash directly in device option, if using fluffy2 go devices and save sxh and use with icprog. sx28 still set to compile with cp enabled. can disable for easier verifying with fluffy2 (will fail verifying with enabled and fluffy2 can sometimes write wrong unlike sxkey will give clear error if does)
+s/asm to be used with SX-Key Editor (official SDK for SX). Requires renaming extension to .src for it to open then just set defines and complie as wish. if have sxkey flash directly in device option, if using fluffy2 go devices and save sxh and use with icprog. sx28 now set not to have copy protect enable in source, really no need for it to be enabled as source shared here and just makes issues with verifying flash.
 
 Current features implemented:
 
@@ -22,7 +22,7 @@ Current features implemented:
 - Dev1
 - Macrovision off and green fix
 - v8 Asian console support which no mods currently available do (dms does but poorly)
-- v1-90k (though 75k+ decka models is poor preformance at this point, better in pal fat consoles)
+- v1-90k (though 75k+ decka models is poor preformance compared to modbo, better in pal fat consoles)  - v14 support works better with backport of h2o+ logo patch, still modbo much better option in these models.
 - Disable mode
 
 at its core is simple functions but all need and want out of a chip. dvd9 backups require to be prepatched with toxic patcher (found in tools for pc)
