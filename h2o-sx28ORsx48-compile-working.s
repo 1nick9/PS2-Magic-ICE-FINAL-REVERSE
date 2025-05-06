@@ -5,18 +5,18 @@
 ;DEFINE
 
 ;expermenting defines, not needed.
-;SX48RAM			= 	1			; unneeded memory remap, has issues with 75k ps1drv, likely some wrong cals
+SX48RAM			= 	1			; unneeded memory remap, now working starting at $10 as sx48 has 1-f bank free. sx28 15-1f then or over 2x 4x 6x 8x Ax Cx Ex (had mistaken the or just for 2x bank rest free)
 
 ;SX Chip used. SX48 uncomment below. SX28 have commented.
-;SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
+SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
 
-RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48. sx28 DECFCB1171D02DAE402AC30419CBBDAB
+;RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48. sx28 DECFCB1171D02DAE402AC30419CBBDAB
 ;USE SX48RSTBUMP ONLY FOR SX COMPILING FOR SX48. Both RSTBUMP and SX48RSTBUMP must be on
 ;SX48RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. for sx48 with RSTBUMP uncommented	4F544B1369ADFAFFA973F51FB47CD27B
 
 ;V14/V8jap identiy jmpers. if using sx48 needs the trim, sx28 either can go but stock code is without trim
-H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  sx28 C60170F11BFEF1210C677F3704202E21
-SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. sx28 2CAC930CAEC1E5D3ED67A2AC89769636 sx48 5607357E1E0B3C2815F69713F2AE8970
+;H2O75KJMPERS			= 	1			; uncomment for compiling with restbump for ps1mode. if compiling for rstbmp use one of the sx28/sx48 with h2o v14usa/v14jap/v8jap ident jmpers else use F=TR defines  sx28 C60170F11BFEF1210C677F3704202E21
+;SX48H2O75KJMPERSTRIM			= 	1			; needed if using h2o jmpers ident with sx48 rstbmp. h needs to go to 5v if not jap console or triggers my cad. sx28 2CAC930CAEC1E5D3ED67A2AC89769636 sx48 5607357E1E0B3C2815F69713F2AE8970
 
 ;USE ONLY IF F=TR or RSTBUMP without H2O75KJMPERS.
 ;pal v14 dont define any. for jap/usa define only one for 75k this will make f=tr work correctly also h=rw usa/pal			f=tr 75k pal sx28 B0316082466C451B3E4C201697BB8D05 sx48 3C452A502DC31221D6E882D6A54D83C1
@@ -1311,7 +1311,7 @@ ALL_CONTIUNE_BIOS_PATCH
                     jmp           LOAD_PATCH_DEV1_STACK
                     mov           VAR_DC3,w
 	IFDEF	SX48RAM
-                    mov           w,#$20
+                    mov           w,#$10
 	ELSE						
                     mov           w,#$15
 	ENDIF					
@@ -1376,7 +1376,7 @@ OSDSYS_BIOS_PATCH_SYNC_LOOP6
                     sb            z
                     jmp           OSDSYS_BIOS_PATCH_SYNC
 	IFDEF	SX48RAM
-                    mov           w,#$20;15
+                    mov           w,#$10;15
 	ELSE						
                     mov           w,#$15
 	ENDIF
@@ -1431,7 +1431,7 @@ OSDSYS_BIOS_PATCH_SYNC_P4_L3
 	IFDEF	SX48RAM
 ;SETUPDEV				
 LOAD_PATCH_DEV1_STACK
-                    mov           w,#$27;1c
+                    mov           w,#$17;1c
                     mov           fsr,w
                     mov           w,VAR_DC3
                     mov           indf,w
@@ -1446,26 +1446,26 @@ LOAD_PATCH_DEV1_STACK
                     page          $0200
                     jmp           OSDSYS_BIOS_PATCH_SYNC
 
-SET_V14DRV		;; this problem for unneeded sx48 memory remap ps1 support ???
-                    mov           w,#$2f;34
+SET_V14DRV
+                    mov           w,#$1f;34
                     mov           fsr,w
                     mov           w,#$14
                     mov           indf,w
                     inc           fsr
                     mov           w,#$2
                     mov           indf,w
-                    mov           w,#$4b;50
+                    mov           w,#$2b;50
                     mov           fsr,w
                     mov           w,#$20
                     mov           indf,w
-                    mov           w,#$4f;54
+                    mov           w,#$2f;54
                     mov           fsr,w
                     mov           w,#$5c
                     mov           indf,w
                     inc           fsr
                     mov           w,#$25
                     mov           indf,w
-                    mov           w,#$55;5a
+                    mov           w,#$35;5a
                     mov           fsr,w
                     mov           w,#$8
                     mov           indf,w
@@ -1473,7 +1473,7 @@ SET_V14DRV		;; this problem for unneeded sx48 memory remap ps1 support ???
                     mov           VAR_DC1,w
                     mov           w,#100;$64
                     mov           VAR_DC3,w
-                    mov           w,#$57;5c
+                    mov           w,#$37;5c
                     mov           fsr,w
                     page          $0200						; PAGE2
                     jmp           LOAD_OSDSYS_BIOS_PATCH_DATA
@@ -1620,7 +1620,7 @@ xcdvdman1_l0a
                     jmp           xcdvdman_patch_again
 ;xcdvdman1_next					
 	IFDEF	SX48RAM
-                    mov           w,#$20;15
+                    mov           w,#$10;15
 	ELSE	
                     mov           w,#$15
 	ENDIF
@@ -1923,7 +1923,7 @@ PS2LOGO_PATCHLOAD_22_JMP2
                     clr           w
                     mov           VAR_DC3,w
 	IFDEF	SX48RAM
-                    mov           w,#$20
+                    mov           w,#$10
 	ELSE					
                     mov           w,#$15
 	ENDIF					
@@ -2084,7 +2084,7 @@ PS2_PS2LOGO:loop1x_L4
                     sb            z
                     jmp           PS2_PS2LOGO::loop00x
 	IFDEF	SX48RAM
-                    mov           w,#$26;1b	
+                    mov           w,#$16;1b	
 	ELSE						
                     mov           w,#$1b
 	ENDIF
@@ -2094,7 +2094,7 @@ PS2_PS2LOGO:loop1x_L4
                     snb           V12_FLAG
                     jmp           PS1_MODE_v12_PATCHS
 	IFDEF	SX48RAM
-                    mov           w,#$37;3C	
+                    mov           w,#$27;3C	
 	ELSE					
                     mov           w,#$3c
 	ENDIF					
@@ -2128,7 +2128,7 @@ PS2_PS2LOGO:back
 ;V12 logo sync					
 PS1_MODE_v12_PATCHS
 	IFDEF	SX48RAM
-                    mov           w,#$27;1c	
+                    mov           w,#$17;1c	
 	ELSE	
                     mov           w,#$1c
 	ENDIF
@@ -2146,7 +2146,7 @@ PS1_CONSOLE_PAL_YFIX
                     mov           w,#11;$b
                     mov           VAR_DC2,w
 	IFDEF	SX48RAM
-                    mov           w,#$20	
+                    mov           w,#$10	
 	ELSE						
                     mov           w,#$15					; fsr decimal 21
 	ENDIF
@@ -2470,7 +2470,7 @@ DEV1_MODE_LOAD_START
                     clr           w
                     mov           VAR_DC3,w				; VAR_DC3 = 0
 	IFDEF	SX48RAM
-                    mov           w,#$20	
+                    mov           w,#$10	
 	ELSE					
                     mov           w,#$15
 	ENDIF					
