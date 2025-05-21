@@ -1,3 +1,5 @@
+update: added some premade just patch needed xdelta for use with redump matched iso, will slowly get to doing more when cbf heh. 
+
 toxic patcher needed for dvd9 support currently. does trigger av but confident it is just due to wrapper used to hide what its doing. can also manually just patch image which only needed change is in ioprpxxx. some know I've found, addresses are just ioprpxxx.
 if patching iso be different address. these patches dont bring in the toxic logo, just the actual needed for dvd+r dl media to run.
 
