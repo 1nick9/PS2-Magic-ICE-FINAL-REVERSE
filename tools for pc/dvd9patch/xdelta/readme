@@ -1,3 +1,5 @@
-xdelta patches ive made up for only porting the needed patch for game to run, no toxic logo like using toxic dvd9 patcher. also as bonus u dont need to worry bout bulk of av hitting infected file warning from the wrapper used on toxic. which im sure just due to they wanted to hide the patch as crashes even ida trying to use it on that.
+xdelta patches ive made up for only porting the needed patch for game to run, no toxic logo like using toxic dvd9 patcher. also as bonus u dont need to worry bout bulk of av hitting infected file 
+warning from the wrapper used on toxic. which im sure just due to they wanted to hide the patch as crashes even ida trying to use it on that.
 
-not all been tested, should be right is just the iop edited where have extracted from redump iso, patched it, unpacked then do show compare in hxd and note differences n then patch original untouched redump and make xdelta comparing it to the redump original and patched.
+not all been tested, should be right is just the iop edited where have extracted from redump iso, patched it, unpacked then do show compare in hxd and note differences n then patch original untouched 
+redump and make xdelta comparing it to the redump original and patched.
