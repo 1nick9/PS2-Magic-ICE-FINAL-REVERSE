@@ -55,8 +55,6 @@ SX ASM Instructions (archive capture as now down the original site as noticed on
 
 https://web.archive.org/web/20250320181845/https://www.sxlist.com/techref/scenix/inst.htm
 
-www.sxlist.com/techref/scenix/inst.htm
-
 Official SX Documents
 
 https://www.parallax.com/package/sx-key-usb-downloads/
