@@ -42,6 +42,7 @@ this is the last rev of spc mechacon which only found in late model jap console 
 mods that dont work with this are infinity based. so this is a nice improvement to add support for a low supported hardware modchip wise :)
 
 Sources:
+
 Original ICE team site (maybe just mirror)
 
 https://www.angelfire.com/clone/magicfriend/
@@ -50,7 +51,9 @@ Angelica SX Disassembler (archive.org capture as long down)
 
 https://web.archive.org/web/20110816110647/http://online.dip.jp/angelica/index_e.html
 
-SX ASM Instructions
+SX ASM Instructions (archive capture as now down the original site as noticed on header of page for long while)
+
+https://web.archive.org/web/20250320181845/https://www.sxlist.com/techref/scenix/inst.htm
 
 www.sxlist.com/techref/scenix/inst.htm
 
