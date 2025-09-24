@@ -223,7 +223,7 @@ STARTUP
                     clr           w
                     mov           !IO_CDDVD_BUS,w
                     mode          $000B						;enable wakeup...
-                    mov           w,#$f3					; 1111 1011
+                    mov           w,#$f3					; 1111 0011
                     mov           !IO_CDDVD_BUS,w				;... on & RB2 (reset) 
                     mode          $000F
                     sleep         
@@ -260,8 +260,87 @@ STARTUP          								;here from stby & wake up...
 CLEAR_CONSOLE_INFO_PREFIND
                     clr           VAR_PATCH_FLAGS		;reset all used flag...
                     clr           VAR_SWITCH	
+										  
+													  
+														 
+
+				   
+			   
+															  
+																   
+										  
+																			 
+																  
+		
+					  
+																			   
+										   
+			 
+						 
+																	   
+										   
+			
+						 
+																												  
+										
+			 
+						 
+																					   
+														
+																		
                     jmp           V0_CONSOLE_CDDVD_START					
+										  
+													  
+																						 
+								   
+														   
+										 
+														   
+										 
+														   
+																   
+
+														
+
 ;--------------------------------------------------------------------------------
+											
+																				 
+		   
+										
+									 
+									   
+												 
+										
+									 
+								   
+												 
+										
+									 
+										
+												 
+										
+									 
+								  
+	 
+																  
+														
+																												   
+																		   
+													
+																					
+																				
+																		 
+																								 
+														
+																								  
+																					   
+						   
+	  
+
+
+
+	 
+																				 
 CDDVD_PATCH_DATA_v0
 ;--------------------------------------------------------------------------------
                     jmp           pc+w	
@@ -391,7 +470,7 @@ postpatchv0mecha
                     mov           !IO_DVD_DATA,w
 					
 PS1_MODE_RB_IO_SET_SLEEP
-                    mov           w,#$fb					; 1111 1011
+                    mov           w,#$f3					; 1111 0011
                     mov           !IO_CDDVD_BUS,w				; rb.2 IO_REST rb.3 IO_EJECT enabled
                     sleep         
 
