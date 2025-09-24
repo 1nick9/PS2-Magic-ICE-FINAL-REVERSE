@@ -260,87 +260,8 @@ STARTUP          								;here from stby & wake up...
 CLEAR_CONSOLE_INFO_PREFIND
                     clr           VAR_PATCH_FLAGS		;reset all used flag...
                     clr           VAR_SWITCH	
-										  
-													  
-														 
-
-				   
-			   
-															  
-																   
-										  
-																			 
-																  
-		
-					  
-																			   
-										   
-			 
-						 
-																	   
-										   
-			
-						 
-																												  
-										
-			 
-						 
-																					   
-														
-																		
                     jmp           V0_CONSOLE_CDDVD_START					
-										  
-													  
-																						 
-								   
-														   
-										 
-														   
-										 
-														   
-																   
-
-														
-
 ;--------------------------------------------------------------------------------
-											
-																				 
-		   
-										
-									 
-									   
-												 
-										
-									 
-								   
-												 
-										
-									 
-										
-												 
-										
-									 
-								  
-	 
-																  
-														
-																												   
-																		   
-													
-																					
-																				
-																		 
-																								 
-														
-																								  
-																					   
-						   
-	  
-
-
-
-	 
-																				 
 CDDVD_PATCH_DATA_v0
 ;--------------------------------------------------------------------------------
                     jmp           pc+w	
@@ -469,9 +390,18 @@ postpatchv0mecha
                     mov           w,#$ff
                     mov           !IO_DVD_DATA,w
 					
-PS1_MODE_RB_IO_SET_SLEEP
+RB_IO_SET_SLEEP
+                    mode          $000A						; XAh WKED_B Each register bit selects the edge sensitivity of the corresponding Port B input pin for MIWU operation. ;todo
+                    mov           w,#$6						; 0000 0110 Set the bit to 1 to sense falling (high-to-low) edges.
+                    mov           !IO_CDDVD_BUS,w				; rb.1 IO_BIOS_CS rb.2 IO_REST high-to-low sense
+                    mode          $0009						; X9h Exchange WKPND_B
+                    clr           w						; 0000 0000
+                    mov           !IO_CDDVD_BUS,w				; A bit set to 1 indicates that a valid edge has occurred on the corresponding MIWU pin, triggering a wakeup or interrupt. 
+										; A bit set to 0 indicates that no valid edge has occurred on the MIWU pin. 
+										; The WKPND_B register comes up with undefine value upon reset.
+                    mode          $000B						; XBh WKEN_B	Multi-Input Wakeup/Interrupt (MIWU) function for the corresponding Port B input pin. 
+										
                     mov           w,#$f3					; 1111 0011
                     mov           !IO_CDDVD_BUS,w				; rb.2 IO_REST rb.3 IO_EJECT enabled
-                    sleep         
 
-                    org           $0400						; PAGE4 400-5FF					
+                    sleep         				
