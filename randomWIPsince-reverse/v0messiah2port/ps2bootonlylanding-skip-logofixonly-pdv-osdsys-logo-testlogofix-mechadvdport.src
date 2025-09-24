@@ -3916,7 +3916,7 @@ postpatchv0mecha
                     jmp           postpatchv0mecha
                     mov           w,#$ff
                     mov           !re,w
-					page $0E00					
+					page $0A00					
 					jmp	V0_logo
 	ENDIF					
 
