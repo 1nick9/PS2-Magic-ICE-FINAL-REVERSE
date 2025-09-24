@@ -352,7 +352,7 @@ V0_AND_BYTE_SYNC1_L1_sync2
                     decsz         VAR_DC1
                     jmp           V0_AND_BYTE_SYNC1_L1_sync
 					
-pIO_DVD_DATAload_var
+preload_var
                     clr           w							; start 0 as universal run
                     mov           VAR_DC2,w
                     mov           w,#6						;6 of bytes to patch after first preloaded total 7
