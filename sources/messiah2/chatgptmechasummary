@@ -1,0 +1,165 @@
+The detect_patt Verilog module is designed to detect a specific data pattern sequence and determine its type and validity based on incoming 8-bit data (data), synchronized with an enable signal (oe). It also supports an asynchronous reset (int_reset). Here's a summary of its core functionality:
+________________________________________
+🔍 Purpose
+This module:
+•	Detects a known start sequence (0xFF repeated 4 times followed by a specific byte).
+•	Determines the pattern type based on that specific byte.
+•	Validates a follow-up pattern based on a known expected sequence (5F, FF, FF, 5F, etc.).
+•	Outputs:
+o	patt_type: 2-bit code indicating the detected pattern type.
+o	patt_valid: 1-bit flag that is asserted when a valid pattern is fully detected.
+________________________________________
+🧾 Inputs and Outputs
+Inputs:
+•	oe : Clock-like enable signal, triggers state transitions.
+•	int_reset : Asynchronous reset signal.
+•	data [7:0] : 8-bit input data stream.
+Outputs:
+•	patt_type [1:0] : Type of detected pattern. Encoded as:
+o	00 → p0040
+o	01 → p1050
+o	10 → p4040
+o	11 → p5050
+•	patt_valid : High when a complete, valid pattern is detected.
+________________________________________
+🧠 How It Works
+1. Start Pattern Detection (FSM 1)
+•	Uses a state register p_start_reg to track how many consecutive 0xFF bytes have been seen.
+•	After 4 0xFF bytes, the next byte determines the pattern type:
+o	0x00 → p0040
+o	0x10 → p1050
+o	0x40 → p4040
+o	0x50 → p5050
+2. Pattern Validation (FSM 2)
+•	After detecting a pattern start, the module begins validating a fixed 10-byte follow-up sequence:
+•	5F FF FF 5F FF FF 5F FF FF
+•	Uses a counter (patt_valid_cnt) to track the current step.
+•	If any byte does not match the expected one, the count resets (starts validation again).
+•	If the sequence is successfully matched, patt_valid is set to 1.
+3. Reset Behavior
+•	On int_reset, all state machines and outputs are reset.
+________________________________________
+🧪 Key Internal Registers
+•	p_start_reg : Tracks progress of the start sequence.
+•	patt_type : Stores the detected pattern type.
+•	patt_valid_cnt : Tracks progress through the pattern validation sequence.
+•	patt_valid : High when the full validation sequence is correct.
+________________________________________
+🧾 Design Versions and Comments
+•	The code includes:
+o	Current version (main implementation)
+o	Modified version (more structured FSM with separate curr_* state variables)
+o	Old version (combined logic, less modular)
+o	A commented-out debug signal tp5.
+Each version attempts to improve modularity, robustness, or readability.
+________________________________________
+✅ Summary
+The detect_patt module is a finite state machine (FSM)-based pattern recognizer. It:
+•	Waits for 4 0xFF bytes,
+•	Identifies a pattern type from the next byte,
+•	Validates a 9-byte sequence after that,
+•	Outputs whether the pattern is valid and what type it is.
+________________________________________
+Let me know if you'd like a state diagram, timing diagram, or conversion to SystemVerilog or testbench.
+
+
+
+
+The cdvd_patch module is a data patcher that monitors data sequences and issues patches (modifications to the data stream) based on previously detected patterns. It works in coordination with the detect_patt module you provided earlier, using the patt_type and patt_valid signals to determine when and what to patch.
+________________________________________
+🧾 Purpose
+cdvd_patch performs conditional data patching for CD/DVD command sequences. It:
+•	Monitors specific command patterns (0x40, 0x80, 0x80 or 0x08, 0xEF, 0x80)
+•	Determines CD or DVD mode (cd_dvd)
+•	Uses a delay/timer mechanism to manage patching timing
+•	Outputs a patch value (patch) and a patch enable signal (p_en)
+•	Handles different pattern types (p1050, p4040, p5050) with specific behavior
+________________________________________
+🔌 Inputs and Outputs
+🟢 Inputs:
+Signal	Width	Description
+oe	1	Clock-like strobe signal for main logic
+data	8	Input data byte
+zero	1	External condition used for patch enable
+patt_type	2	Pattern type detected (from detect_patt)
+patt_valid	1	Pattern validity flag (from detect_patt)
+d_128	1	Slower clock (used for timing, like 128 Hz)
+🔴 Outputs:
+Signal	Width	Description
+patch	8	Data value to patch
+p_en	1	Patch enable signal
+________________________________________
+🧠 Key Internal Functions
+1. Timer Logic
+•	A timer (timer) increments on d_128 if patt_valid is active and reset conditions aren't met.
+•	Generates a time_frame (timer between 28–33) and a delay flag (was_delay) for determining patch readiness.
+•	delay_1ms is a secondary delay counter used to validate timing further.
+2. Initialization Logic
+•	Uses init and init_complete flags to track if initialization conditions are satisfied.
+•	init_complete becomes 1 if valid delays are observed during the time_frame.
+3. Command Detection FSMs
+Two FSMs detect command sequences:
+•	Command C (CD):
+o	Sequence: 0x40 → 0x80 → 0x80
+•	Command D (DVD):
+o	Sequence: 0x08 → 0xEF → 0x80
+Sets cd_dvd to:
+•	0 → CD command detected
+•	1 → DVD command detected
+4. Counter Control (cntr)
+•	Controlled by:
+o	init_complete
+o	cd_dvd
+o	New command detected
+•	Increments until a specific limit:
+o	CD: max count = 14
+o	DVD: max count = 5
+5. Patch Table for p1050
+•	Uses R_cnt to step through a predefined patch sequence:
+0 : 0x03
+1 : 0x00
+2 : 0x02
+3 : 0x00
+4 : 0x80
+5 : 0x00
+6 : 0x80
+•	Output enabled if patt_valid and patt_type == p1050.
+6. Patch Output Control
+Based on patt_type:
+•	If p1050 and patt_valid, outputs from R_patch (controlled by R_cnt)
+•	If p4040 or p5050, and depending on cd_dvd mode:
+o	Patch 0xAB output at:
+	CD: cntr == 14
+	DVD: cntr == 5
+o	p_en controlled by zero
+________________________________________
+🧠 High-Level Operation Flow
+1.	Pattern Detection (from detect_patt)
+2.	Timer Starts when specific data (0x60) arrives
+3.	FSM Watches Commands (0x40-80-80, 0x08-EF-80)
+4.	CD/DVD Mode Set
+5.	Delay & Timing Verified
+6.	Counter Increments Based on Mode
+7.	Patch Data Output at specific counter values or through R_cnt for p1050
+8.	Patch Enable Signal (p_en) activates patch when conditions are met
+________________________________________
+🔍 Example Use Cases
+Detected Pattern	Mode	Patch Output	When
+p1050	N/A	Sequence from R_patch	Each step of R_cnt (0–6)
+p4040 / p5050	CD	0xAB	At cntr == 14, if zero == 1
+p4040 / p5050	DVD	0xAB	At cntr == 5, if zero == 1
+________________________________________
+✅ Summary
+The cdvd_patch module is a patch logic controller that:
+•	Monitors specific CD/DVD command sequences
+•	Tracks time delays and valid pattern detection
+•	Outputs specific patch values at precise times based on the detected pattern type and media type (CD/DVD)
+•	Controls when patches are injected into the data stream
+It works as a companion module to detect_patt, forming a system that detects, tracks, and modifies specific sequences in a data stream, likely for system-level protocol handling (e.g., console bootloader or media controller emulation).
+________________________________________
+Let me know if you'd like:
+•	A diagram of the FSMs
+•	A waveform simulation example
+•	A testbench template
+•	Or help refactoring / optimizing the code
+
