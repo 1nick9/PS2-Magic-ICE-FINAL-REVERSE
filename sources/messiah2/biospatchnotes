@@ -1,0 +1,81 @@
+bios1		//PDV key				---- first
+sync start 0
+10 00 a2 af 04 00 40 10
+unquie cut
+10 00 a2 af 04
+skip
+36+3
+patch on 44
+08 00 e0 03 00 00 00 00
+
+bios2		//osdsys				--- second
+sync
+all others
+f8 01 04 0c 02 00 04 24
+10k
+70 0a 08 0c 2d 28 00 02
+ice
+70 0a 08
+skip
+8
+00 00 00 00
+
+bios3 logo							--- need above patches to show below???
+sync all
+d0 80 80 af 1e 08 04 0c
+sync 10k
+4e 12 08 08 04 00 40 ac
+
+start patch
+20 38 11 00 00 60 03 24 00 00 e2 90 00 00 e4 90 ff ff 63 24 26 20 82 00 00 00 e4 a0 fb ff 61 04 01 00 e7 24 2e 01 22 92 2f 01 23 92 26 10 43 00 1a 00 03 24 13 00 43 14 ff 55 02 24 ff 5f 03 24 28 00 04 24 ff ff 84 20 20 28 23 02 00 00 a0 a0 fc ff 80 14 ff 63 20 58 01 04 24 ff ff 84 20 20 28 23 02 20 30 22 02 00 00 c7 80 00 00 a7 a0 ff ff 63 20 f9 ff 80 14 ff ff 42 20 f0 ff 40 1c 00 00 00 00 b2 14 08 08 14 00 03 8e
+....
+
+
+bios4		// return before blue screen of death
+sync
+20 14 63 34 ff 10 42 34
+skip
+0
+patch
+00 00 bf 7b 08 00 e0 03 10 00 bd 27
+
+bios5	//psx disable return to original mode
+sync
+ff ff 29 35 ff e7 06 3c
+skip
+4
+patch
+00 00 00 00
+
+bios6 //psx pal/ntsc redirection
+sync
+19 18 60 a0 c2 10 11 00
+skip
+0
+patch
+...
+
+bios7
+sync
+ff ff 4a 35 ff e7 06 3c
+skip
+4
+patch
+00 00 00 00
+
+bios8	//PSX license
+
+
+bios9		// corect ps2logo for old models
+sync
+18 00 c7 00 12 30 00 00
+skip
+8
+64 13 08 08
+
+
+
+c4 27 18 d0
+
+a2 93 34 
+27 18 00 a3
