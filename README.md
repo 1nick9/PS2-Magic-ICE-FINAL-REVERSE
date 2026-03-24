@@ -24,7 +24,7 @@ Current features implemented:
 - v8 Asian console support which no mods currently available do (dms does but poorly)
 - v1-90k (though 75k+ decka models is poor preformance compared to modbo, better in pal fat consoles)  - v14 support works better with backport of h2o+ logo patch, still modbo much better option in these models.
 - Disable mode
-no ps1 antimod support, use ppfs for those games found https://consolecopyworld.com/
+- no ps1 antimod support use ppfs for those games found https://consolecopyworld.com/
 
 at its core is simple functions but all need and want out of a chip. dvd9 backups require to be prepatched with toxic patcher (found in tools for pc)
 
