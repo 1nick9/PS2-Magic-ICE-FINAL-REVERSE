@@ -5,10 +5,11 @@
 ;DEFINE
 
 ;expermenting defines, not needed.
-SX48RAM			= 	1			; unneeded memory remap, now working starting at $10 as sx48 has 1-f bank free. sx28 15-1f then or over 2x 4x 6x 8x Ax Cx Ex (had mistaken the or just for 2x bank rest free)
+;SX48RAM			= 	1			; unneeded memory remap, now working starting at $10 as sx48 has 1-f bank free. sx28 15-1f then or over 2x 4x 6x 8x Ax Cx Ex (had mistaken the or just for 2x bank rest free)
+ICEFINALDEV1			= 1			; use ice final dev1 patch, disable uses h2o dev1 patch
 
 ;SX Chip used. SX48 uncomment below. SX28 have commented.
-SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
+;SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
 
 ;RSTBUMP			= 	1			; uncomment for compiling with restbump for ps1mode. sx28 or this and next define aswell for sx48. sx28 DECFCB1171D02DAE402AC30419CBBDAB
 ;USE SX48RSTBUMP ONLY FOR SX COMPILING FOR SX48. Both RSTBUMP and SX48RSTBUMP must be on
@@ -24,7 +25,7 @@ SX48			= 	1			; uncomment for compiling for sx48 else is compiled for sx28 F=TR
 ;JAPv14orv8			= 	1			;uncomment for fixed 75k being jap region. all prior still work any region		f=tr 75k jap sx28 6666645ED508DCA4FABF59A2E4296E20 sx48 08F345CF0FD1183AFCD89A20ACCF6BC3
 ;also for v7 to use v9+ mechacon patch for v8 jap support f=tr 
 
-;NTSCPS1YFIX75K		= 	1			;uncomment for 75k NTSC IMPORT YFIX PAL CONSOLE TESTED makes pal off screen but ntsc correct. off pal correct, ntsc crushed.
+NTSCPS1YFIX75K		= 	1			;uncomment for 75k NTSC IMPORT YFIX PAL CONSOLE TESTED makes pal off screen but ntsc correct. off pal correct, ntsc crushed.
 
 ;only rstbump v8jap tested but rest should be right
 	IFDEF	SX48
@@ -1441,7 +1442,12 @@ LOAD_PATCH_DEV1_STACK
                     clr           fsr
                     mov           w,#$4
                     mov           IO_BIOS_DATA,w
-                    mov           w,#$77
+	IFDEF ICEFINALDEV1
+                    mov           w,#119;$77						;;;;dev1 alt for sx48
+	ELSE
+                    mov           w,#115;$73						;;;;dev1 alt for sx48
+	ENDIF					
+;;;ASWAS                    mov           w,#119;$77				;;;;dev1 DIFFERENT VAR_DC2 for sx48 BUG LENGHT PATCH fixed above
                     mov           VAR_DC2,w
                     page          $0200
                     jmp           OSDSYS_BIOS_PATCH_SYNC
@@ -1490,7 +1496,11 @@ LOAD_PATCH_DEV1_STACK
                     clr           fsr
                     mov           w,#$4
                     mov           IO_BIOS_DATA,w
-                    mov           w,#115;$73
+	IFDEF ICEFINALDEV1
+                    mov           w,#119;$77						;;;;dev1 alt for sx28
+	ELSE
+                    mov           w,#115;$73						;;;;dev1 alt for sx28
+	ENDIF
                     mov           VAR_DC2,w
                     page          $0200
                     jmp           OSDSYS_BIOS_PATCH_SYNC
@@ -2339,8 +2349,137 @@ BIOS_WAIT_OE_LO_P8
                     jmp           BIOS_WAIT_OE_LO_P8
                     ret           
 
+IFDEF ICEFINALDEV1
+
 ;--------------------------------------------------------------------------------
-BIOS_PATCH_DEV1 ;  straight patch flow 0 - 115
+BIOS_PATCH_DEV1 ;  straight patch flow 0 - 118 ICEFINAL PATCH
+;--------------------------------------------------------------------------------
+                    jmp           pc+w
+                    retw          $8		; 0
+                    retw          $10		; 1
+                    retw          $3c		; 2
+                    retw          $72		; 3
+                    retw          $0		; 4
+                    retw          $11		; 5
+                    retw          $36		; 6
+                    retw          $0		; 7
+                    retw          $0		; 8
+                    retw          $92		; 9
+                    retw          $34		; 10
+                    retw          $0		; 11
+                    retw          $0		; 12
+                    retw          $51		; 13
+                    retw          $ae		; 14
+                    retw          $c		; 15
+                    retw          $0		; 16
+                    retw          $0		; 17
+                    retw          $0		; 18
+                    retw          $3		; 19
+                    retw          $0		; 20
+                    retw          $5		; 21
+                    retw          $24		; 22
+                    retw          $10		; 23
+                    retw          $0		; 24
+                    retw          $4		; 25
+                    retw          $3c		; 26
+                    retw          $f0		; 27
+                    retw          $1		; 28
+                    retw          $84		; 29
+                    retw          $34		; 30
+                    retw          $10		; 31
+                    retw          $0		; 32
+                    retw          $6		; 33
+                    retw          $3c		; 34
+                    retw          $e4		; 35
+                    retw          $1		; 36
+                    retw          $c6		; 37
+                    retw          $34		; 38
+                    retw          $6		; 39
+                    retw          $0		; 40
+                    retw          $3		; 41
+                    retw          $24		; 42
+                    retw          $c		; 43
+                    retw          $0		; 44
+                    retw          $0		; 45
+                    retw          $0		; 46
+                    retw          $fb		; 47
+                    retw          $1		; 48
+                    retw          $10		; 49
+                    retw          $0		; 50
+                    retw          $b		; 51
+                    retw          $2		; 52
+                    retw          $10		; 53
+                    retw          $0		; 54
+                    retw          $19		; 55
+                    retw          $2		; 56
+                    retw          $10		; 57
+                    retw          $0		; 58
+                    retw          $6d		; 59
+                    retw          $6f		; 60
+                    retw          $64		; 61
+                    retw          $75		; 62
+                    retw          $6c		; 63
+                    retw          $65		; 64
+                    retw          $6c		; 65
+                    retw          $6f		; 66
+                    retw          $61		; 67
+                    retw          $64		; 68
+                    retw          $0		; 69
+                    retw          $2d		; 70
+                    retw          $6d		; 71
+                    retw          $20		; 72
+                    retw          $72		; 73
+                    retw          $6f		; 74
+                    retw          $6d		; 75
+                    retw          $30		; 76
+                    retw          $3a		; 77
+                    retw          $53		; 78
+                    retw          $49		; 79
+                    retw          $4f		; 80
+                    retw          $32		; 81
+                    retw          $4d		; 82
+                    retw          $41		; 83
+                    retw          $4e		; 84
+                    retw          $0		; 85
+                    retw          $2d		; 86
+                    retw          $6d		; 87
+                    retw          $20		; 88
+                    retw          $72		; 89
+                    retw          $6f		; 90
+                    retw          $6d		; 91
+                    retw          $30		; 92
+                    retw          $3a		; 93
+                    retw          $4d		; 94
+                    retw          $43		; 95
+                    retw          $4d		; 96
+                    retw          $41		; 97
+                    retw          $4e		; 98
+                    retw          $0		; 99
+                    retw          $6d		; 100
+                    retw          $63		; 101
+                    retw          $30		; 102
+                    retw          $3a		; 103
+                    retw          $2f		; 104
+                    retw          $42		; 105
+                    retw          $4f		; 106
+                    retw          $4f		; 107
+                    retw          $54		; 108
+                    retw          $2f		; 109
+                    retw          $42		; 110
+                    retw          $4f		; 111
+                    retw          $4f		; 112
+                    retw          $54		; 113
+                    retw          $2e		; 114
+                    retw          $45		; 115
+                    retw          $4c		; 116
+                    retw          $46		; 117
+                    retw          $0		; 118	
+
+
+
+ELSE
+;--------------------------------------------------------------------------------
+BIOS_PATCH_DEV1 ;  straight patch flow 0 - 114 H2O PATCH
 ;--------------------------------------------------------------------------------
 ;LOAD_DEVMODE
                     jmp           pc+w
@@ -2432,8 +2571,8 @@ BIOS_PATCH_DEV1 ;  straight patch flow 0 - 115
                     retw          $72
                     retw          $6f
                     retw          $6d
-                    retw          $30
-                    retw          $3a	;90
+                    retw          $30	;90
+                    retw          $3a
                     retw          $4d
                     retw          $43
                     retw          $4d
@@ -2458,14 +2597,19 @@ BIOS_PATCH_DEV1 ;  straight patch flow 0 - 115
                     retw          $45
                     retw          $4c
                     retw          $46
-                    retw          $0	;115
+                    retw          $0	;114
+ENDIF					
 					
 DEV1_MODE_LOAD_START
                     clrb          PSX_FLAG				; PSX_FLAG clrb here from being set due to HOLD_BOOT_MODES ran then reset
                     setb          SOFT_RST
                     setb          EJ_FLAG				; skip logo patch after media for DEVMODE
                     setb          DEV1_FLAG				;set DEVMODE flags
+		IFDEF ICEFINALDEV1
+                    mov           w,#119;$77				;;;;
+		ELSE
                     mov           w,#115;$73
+		ENDIF
                     mov           VAR_DC1,w				; VAR_DC1 = 73h = 115
                     clr           w
                     mov           VAR_DC3,w				; VAR_DC3 = 0
