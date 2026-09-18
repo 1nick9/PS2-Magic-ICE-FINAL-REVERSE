@@ -44,9 +44,9 @@ mods that dont work with this are infinity based. so this is a nice improvement 
 
 Sources:
 
-Original ICE team site (maybe just mirror)
+Original ICE team site (maybe just mirror, updated to archive.org capture as down now)
 
-https://www.angelfire.com/clone/magicfriend/
+https://web.archive.org/web/20241104154217/https://www.angelfire.com/clone/magicfriend/
 
 Angelica SX Disassembler (archive.org capture as long down)
 
